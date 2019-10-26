@@ -30,12 +30,12 @@ player.y=0;
 player.width=30;
 player.height=30;
 
-var snowball = {};
+var Snowball = {};
 
-snowball.x=0;
-snowball.y=0;
-snowball.width=10;
-snowball.height=10;
+Snowball.x=0;
+Snowball.y=0;
+Snowball.width=10;
+Snowball.height=10;
 
 var request_frame = (function(callback)
 {
@@ -45,7 +45,7 @@ var request_frame = (function(callback)
 var canvas, context;
 var started = false;
 var paused=false;
-var fired=false;
+var fired=[];
 
 $(document).ready(function(){
 
@@ -69,12 +69,12 @@ $(document).ready(function(){
       animate();
     }
     else if(e.keyCode==32){
-      if(!fired)
-      {
-        snowball.x = player.x;
-        snowball.y = player.y;
-        fired=true;
-      }
+      var shot = Object.create(Snowball);
+      // align shot with center of player
+      shot.x = player.x + player.width/2 - shot.width/2;
+      // start shot at tip of player
+      shot.y = player.y - shot.height;
+      fired.push(shot);
     }
     else if(e.code=="KeyP"){
       paused=!paused;
@@ -102,7 +102,9 @@ var y_max = false;
 function animate()
 {
 
-context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+context.fillStyle = "rgba(255, 255, 255, 0.5)";
+context.strokeStyle = "#000";
+context.lineWidth=2;
 
 if(paused) {
   context.fillStyle = 'rgba(255, 255, 255, 0.5)';
@@ -138,16 +140,49 @@ if(y_max)
 else
   player.y += 3;
 
-context.fillRect(player.x, player.y, player.width, player.height);
+//player.y=700;
+
+context.beginPath();
+context.arc(player.x, player.y, player.width, 0 , 2 * Math.PI);
+context.fill();
+context.stroke();
+
+//context.fillRect(player.x, player.y, player.width, player.height);
+
 //context.fillRect(player.x + 20, player.y, player.width, player.height);
 //context.fillRect(player.x, player.y + 20, player.width, player.height);
 //context.fillRect(player.x + 20, player.y + 20, player.width, player.height);
-if(fired)
+
+var shot_count = fired.length;
+
+if(shot_count)
 {
-  snowball.y -= 3;
-  context.fillRect(snowball.x, snowball.y, snowball.width, snowball.height);
-  if(snowball.y <= 0)
-    fired=false;
+
+  for(var i = 0; i < shot_count; i++)
+  {
+    
+    var shot = fired[i]
+    
+    shot.y -= 1;
+    //context.beginPath();
+    context.arc(shot.x, shot.y, shot.width, 0 , 2 * Math.PI);
+    context.fill();
+    context.stroke();
+    //context.fillRect(shot.x, shot.y, shot.width, shot.height);
+    if((shot.y + shot.height) <= 0)
+    {
+      // remove element from fired array if it goes off screen
+      fired.splice(i, 1);
+      i--;
+      shot_count--;
+    }
+    
+    document.title=shot_count;
+  
+  }
+  //snowball.y -= 3;
+  //if(snowball.y <= 0)
+    //fired=false;
 }
 
 request_frame(function() {
