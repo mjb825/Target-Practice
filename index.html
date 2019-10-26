@@ -71,9 +71,9 @@ $(document).ready(function(){
     else if(e.keyCode==32){
       var shot = Object.create(Snowball);
       // align shot with center of player
-      shot.x = player.x + player.width/2 - shot.width/2;
+      shot.x = player.x
       // start shot at tip of player
-      shot.y = player.y - shot.height;
+      shot.y = player.y - player.width - shot.width;
       fired.push(shot);
     }
     else if(e.code=="KeyP"){
@@ -81,15 +81,24 @@ $(document).ready(function(){
       if(!paused)
         animate();
     }
+  }).mousemove(function(e){
+    var rect = canvas.getBoundingClientRect();
+    mouse_x = e.clientX - rect.left;
+    mouse_y = e.clientY - rect.top;
   });
 
 });
 
+var mouse_x, mouse_y;
+
 function movePlayer(e)
 {
+var rect = canvas.getBoundingClientRect();
+mouse_x = e.clientX - rect.left;
+mouse_y = e.clientY - rect.top;
+return;
 if(!started)
   return;
-var rect = canvas.getBoundingClientRect();
 var message = (e.clientX - rect.left) + ", " + (e.clientY - rect.top);
 context.clearRect(0, 0, canvas.width, canvas.height);
 context.textAlign = 'left';
@@ -140,12 +149,14 @@ if(y_max)
 else
   player.y += 3;
 
-//player.y=700;
+player.x = mouse_x;
+player.y = mouse_y;
 
 context.beginPath();
-context.arc(player.x, player.y, player.width, 0 , 2 * Math.PI);
+context.arc(player.x, player.y, player.width, 1.5 * Math.PI , 2 * Math.PI + 1.5 * Math.PI);
 context.fill();
 context.stroke();
+//context.beginPath();
 
 //context.fillRect(player.x, player.y, player.width, player.height);
 
@@ -155,6 +166,7 @@ context.stroke();
 
 var shot_count = fired.length;
 
+// draw shots if any exist
 if(shot_count)
 {
 
@@ -165,7 +177,7 @@ if(shot_count)
     
     shot.y -= 1;
     //context.beginPath();
-    context.arc(shot.x, shot.y, shot.width, 0 , 2 * Math.PI);
+    context.arc(shot.x, shot.y, shot.width, 1.5 * Math.PI , 2 * Math.PI + 1.5 * Math.PI);
     context.fill();
     context.stroke();
     //context.fillRect(shot.x, shot.y, shot.width, shot.height);
