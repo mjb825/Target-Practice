@@ -22,14 +22,30 @@ body {
 }
 </style>
 <script>
-window.requestAnimFrame = (function(callback) {
-  return function(callback) {
-    window.setTimeout(callback, 1000 / 60);
-  };
+var player = {};
+
+player.avatar="snowman.png";
+player.x=0;
+player.y=0;
+player.width=30;
+player.height=30;
+
+var snowball = {};
+
+snowball.x=0;
+snowball.y=0;
+snowball.width=10;
+snowball.height=10;
+
+var request_frame = (function(callback)
+{
+  return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback){window.setTimeout(callback, 1000 / 60)};
 })();
 
 var canvas, context;
 var started = false;
+var paused=false;
+var fired=false;
 
 $(document).ready(function(){
 
@@ -50,6 +66,20 @@ $(document).ready(function(){
     if(e.keyCode==13){
       context.clearRect(0, 0, canvas.width, canvas.height);
       started=true;
+      animate();
+    }
+    else if(e.keyCode==32){
+      if(!fired)
+      {
+        snowball.x = player.x;
+        snowball.y = player.y;
+        fired=true;
+      }
+    }
+    else if(e.code=="KeyP"){
+      paused=!paused;
+      if(!paused)
+        animate();
     }
   });
 
@@ -67,12 +97,70 @@ context.fillText(message, 10, 25);
 }
 
 
+var x_max = false;
+var y_max = false;
+function animate()
+{
+
+context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+
+if(paused) {
+  context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  context.fillRect(0, canvas.height / 2 - 25, canvas.width, 50);
+  context.font = '28pt Calibri';
+  context.fillStyle = '#000';
+  context.textAlign = 'center';
+  context.textBaseline = "middle"; 
+  context.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
+  return;
+}
+
+context.clearRect(0, 0, canvas.width, canvas.height);
+
+
+if((player.x + player.width) > canvas.width)
+  x_max = true;
+else if(player.x < 0)
+  x_max = false;
+
+if((player.y + player.height) > canvas.height)
+  y_max = true;
+else if(player.y < 0)
+  y_max = false;
+
+if(x_max)
+  player.x -= 3;
+else
+  player.x += 3;
+
+if(y_max)
+  player.y -= 3;
+else
+  player.y += 3;
+
+context.fillRect(player.x, player.y, player.width, player.height);
+//context.fillRect(player.x + 20, player.y, player.width, player.height);
+//context.fillRect(player.x, player.y + 20, player.width, player.height);
+//context.fillRect(player.x + 20, player.y + 20, player.width, player.height);
+if(fired)
+{
+  snowball.y -= 3;
+  context.fillRect(snowball.x, snowball.y, snowball.width, snowball.height);
+  if(snowball.y <= 0)
+    fired=false;
+}
+
+request_frame(function() {
+  animate();
+});
+
+}
 </script>
 </head>
 
 <body>
 
-<canvas id="game" onmousemove="movePlayer(event)" width=700 height=700></canvas>
+<canvas id="game" onmousemove="return;movePlayer(event)" width=1000 height=700></canvas>
 
 
 </body>
