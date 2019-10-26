@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Snowball Practice</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<style type="text/css">
+body {
+  background: #fff;
+}
+
+#game {
+  background: linear-gradient(#1e5a97, #62a7ee, #1e5a97);
+  
+  margin: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  
+}
+</style>
+<script>
+window.requestAnimFrame = (function(callback) {
+  return function(callback) {
+    window.setTimeout(callback, 1000 / 60);
+  };
+})();
+
+var canvas, context;
+var started = false;
+
+$(document).ready(function(){
+
+  canvas = $("#game")[0];
+  context = canvas.getContext('2d');
+  
+  // game intro instructions
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.font = '18pt Calibri';
+  context.fillStyle = '#fff';
+  context.textAlign = 'center';
+  context.fillText("Press ENTER to start game", canvas.width / 2, 50);
+  context.fillText("Use LEFT and RIGHT arrow keys to move player", canvas.width / 2, 200);
+  context.fillText("Use SPACEBAR to fire at targets", canvas.width / 2, 250);
+  
+  $(document).keypress(function(e){
+    // start game if user presses enter
+    if(e.keyCode==13){
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      started=true;
+    }
+  });
+
+});
+
+function movePlayer(e)
+{
+if(!started)
+  return;
+var rect = canvas.getBoundingClientRect();
+var message = (e.clientX - rect.left) + ", " + (e.clientY - rect.top);
+context.clearRect(0, 0, canvas.width, canvas.height);
+context.textAlign = 'left';
+context.fillText(message, 10, 25);
+}
+
+
+</script>
+</head>
+
+<body>
+
+<canvas id="game" onmousemove="movePlayer(event)" width=700 height=700></canvas>
+
+
+</body>
+</html>
