@@ -37,6 +37,12 @@ Snowball.y=0;
 Snowball.width=10;
 Snowball.height=10;
 
+var Turret = {};
+Turret.x = 0;
+Turret.y = 0;
+Turret.length = 0;
+Turret.angle = 90;
+
 var request_frame = (function(callback)
 {
   return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback){window.setTimeout(callback, 1000 / 60)};
@@ -64,17 +70,29 @@ $(document).ready(function(){
   $(document).keypress(function(e){
     // start game if user presses enter
     if(e.keyCode==13){
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      started=true;
-      animate();
+      if(!started){
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        started=true;
+        animate();
+      }
     }
     else if(e.keyCode==32){
       if(!paused){
         var shot = Object.create(Snowball);
         // align shot with center of player
-        shot.x = player.x
+        //shot.x = player.x
         // start shot at tip of player
-        shot.y = player.y - player.width - shot.width;
+        //shot.y = player.y - player.width - shot.width;
+        
+        shot.x = Turret.x;
+        shot.y = Turret.y;
+        
+        shot.x = canvas.width / 2 - shot.width;
+        shot.y = canvas.height / 2 - shot.width;
+        
+        shot.angle = Turret.angle;
+        shot.length = Turret.length;
+        
         fired.push(shot);
       }
     }
@@ -87,9 +105,43 @@ $(document).ready(function(){
     var rect = canvas.getBoundingClientRect();
     mouse_x = e.clientX - rect.left;
     mouse_y = e.clientY - rect.top;
+    
+  }).keydown(function(e){
+  
+    if(!paused){
+      if(e.keyCode==37)
+        Turret.angle -= 5;
+      else if(e.keyCode==39)
+        Turret.angle += 5;
+      else if(e.keyCode==38)
+        Turret.length -= 5;
+      else if(e.keyCode==40)
+        Turret.length += 5;
+    
+      if(Turret.angle > 360)
+        Turret.angle -= 360;
+      else if(Turret.angle < -360)
+        Turret.angle += 360;
+    
+       document.title=Turret.angle;
+     }
+  
   });
 
 });
+
+    
+function calculate_turret(){
+  
+  var x = player.x;
+  var y = player.y - player.width;
+  
+  var angle = Turret.angle / 180 * Math.PI;
+  
+  Turret.x = Turret.length*Math.cos(angle) + x;
+  Turret.y = Turret.length*Math.sin(angle) + y;
+
+}
 
 var mouse_x, mouse_y;
 
@@ -154,10 +206,20 @@ else
 player.x = mouse_x;
 player.y = mouse_y;
 
+calculate_turret();
+
 context.beginPath();
 context.arc(player.x, player.y, player.width, 1.5 * Math.PI , 2 * Math.PI + 1.5 * Math.PI);
 context.fill();
 context.stroke();
+
+context.beginPath();
+context.lineWidth=5;
+context.moveTo(player.x, player.y-player.width);
+//context.lineTo(player.x+Turret.x, player.y-player.width+Turret.y);
+context.lineTo(Turret.x, Turret.y);
+context.stroke();
+context.lineWidth=2;
 //context.beginPath();
 
 //context.fillRect(player.x, player.y, player.width, player.height);
@@ -177,13 +239,46 @@ if(shot_count)
     
     var shot = fired[i]
     
-    shot.y -= 1;
-    //context.beginPath();
+    //shot.y -= 1;
+    //shot.x -= .5;
+    
+    /*
+    var angle = Turret.angle / 180 * Math.PI;
+    if(Turret.length < 0){
+      shot.x -= Math.cos(angle);
+      shot.y -= Math.sin(angle);
+    }
+    else{
+      shot.x += Math.cos(angle);
+      shot.y += Math.sin(angle);
+    }
+    */
+    
+    var speed = 1.1;
+    var angle = shot.angle / 180 * Math.PI;
+    
+    if(Turret.length <= 0){
+      shot.x -= Math.cos(angle) * speed;
+      shot.y -= Math.sin(angle) * speed;
+    }
+    else{
+      shot.x += Math.cos(angle) * speed;
+      shot.y += Math.sin(angle) * speed;
+    }
+    
+    context.beginPath();
     context.arc(shot.x, shot.y, shot.width, 1.5 * Math.PI , 2 * Math.PI + 1.5 * Math.PI);
     context.fill();
     context.stroke();
     //context.fillRect(shot.x, shot.y, shot.width, shot.height);
-    if((shot.y + shot.height) <= 0)
+    
+    var top_hit = (shot.y + shot.height) <= 0;
+    var bottom_hit = (shot.y - shot.height) >= canvas.height;
+    var left_hit = (shot.x + shot.height) <= 0;
+    var right_hit = (shot.x - shot.height) >= canvas.width;
+    
+    //if(top_hit || bottom_hit || left_hit || right_hit)
+    if(false)
     {
       // remove element from fired array if it goes off screen
       fired.splice(i, 1);
