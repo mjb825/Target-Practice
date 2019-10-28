@@ -77,7 +77,7 @@ $(document).ready(function(){
       }
     }
     else if(e.keyCode==32){
-      if(!paused){
+      if(!paused && started){
         var shot = Object.create(Snowball);
         // align shot with center of player
         //shot.x = player.x
@@ -97,9 +97,11 @@ $(document).ready(function(){
       }
     }
     else if(e.code=="KeyP"){
-      paused=!paused;
-      if(!paused)
-        animate();
+      if(started){
+        paused=!paused;
+        if(!paused)
+          animate();
+      }
     }
   }).mousemove(function(e){
     var rect = canvas.getBoundingClientRect();
@@ -108,7 +110,7 @@ $(document).ready(function(){
     
   }).keydown(function(e){
   
-    if(!paused){
+    if(!paused && started){
       if(e.keyCode==37)
         Turret.angle -= 5;
       else if(e.keyCode==39)
@@ -164,7 +166,6 @@ var x_max = false;
 var y_max = false;
 function animate()
 {
-
 context.fillStyle = "rgba(255, 255, 255, 0.5)";
 context.strokeStyle = "#000";
 context.lineWidth=2;
@@ -181,7 +182,16 @@ if(paused) {
 }
 
 context.clearRect(0, 0, canvas.width, canvas.height);
+context.globalCompositeOperation='source-over';
 
+var grd = context.createLinearGradient(0, 0, 0, canvas.height);
+grd.addColorStop(0, "#1e5a97");
+grd.addColorStop(0.5, "#62a7ee");
+grd.addColorStop(1, "#1e5a97");
+
+context.fillStyle = grd;
+context.fillRect(0, 0, canvas.width, canvas.height);
+context.fillStyle = "rgba(255, 255, 255, 0.5)";
 
 if((player.x + player.width) > canvas.width)
   x_max = true;
