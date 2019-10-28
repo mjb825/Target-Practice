@@ -48,7 +48,7 @@ var request_frame = (function(callback)
   return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback){window.setTimeout(callback, 1000 / 60)};
 })();
 
-var canvas, context;
+var canvas, ctx;
 var started = false;
 var paused=false;
 var fired=[];
@@ -56,53 +56,18 @@ var fired=[];
 $(document).ready(function(){
 
   canvas = $("#game")[0];
-  context = canvas.getContext('2d');
+  ctx = canvas.getContext('2d');
   
   // game intro instructions
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  context.font = '18pt Calibri';
-  context.fillStyle = '#fff';
-  context.textAlign = 'center';
-  context.fillText("Press ENTER to start game", canvas.width / 2, 50);
-  context.fillText("Use LEFT and RIGHT arrow keys to move player", canvas.width / 2, 200);
-  context.fillText("Use SPACEBAR to fire at targets", canvas.width / 2, 250);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.font = '18pt Calibri';
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  ctx.fillText("Press ENTER to start game", canvas.width / 2, 50);
+  ctx.fillText("Use LEFT and RIGHT arrow keys to move player", canvas.width / 2, 200);
+  ctx.fillText("Use SPACEBAR to fire at targets", canvas.width / 2, 250);
   
   $(document).keypress(function(e){
-    // start game if user presses enter
-    if(e.keyCode==13){
-      if(!started){
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        started=true;
-        animate();
-      }
-    }
-    else if(e.keyCode==32){
-      if(!paused && started){
-        var shot = Object.create(Snowball);
-        // align shot with center of player
-        //shot.x = player.x
-        // start shot at tip of player
-        //shot.y = player.y - player.width - shot.width;
-        
-        shot.x = Turret.x;
-        shot.y = Turret.y;
-        
-        shot.x = canvas.width / 2 - shot.width;
-        shot.y = canvas.height / 2 - shot.width;
-        
-        shot.angle = Turret.angle;
-        shot.length = Turret.length;
-        
-        fired.push(shot);
-      }
-    }
-    else if(e.code=="KeyP"){
-      if(started){
-        paused=!paused;
-        if(!paused)
-          animate();
-      }
-    }
   }).mousemove(function(e){
     var rect = canvas.getBoundingClientRect();
     mouse_x = e.clientX - rect.left;
@@ -110,27 +75,90 @@ $(document).ready(function(){
     
   }).keydown(function(e){
   
-    if(!paused && started){
-      if(e.keyCode==37)
-        Turret.angle -= 5;
-      else if(e.keyCode==39)
-        Turret.angle += 5;
-      else if(e.keyCode==38)
-        Turret.length -= 5;
-      else if(e.keyCode==40)
-        Turret.length += 5;
-    
-      if(Turret.angle > 360)
-        Turret.angle -= 360;
-      else if(Turret.angle < -360)
-        Turret.angle += 360;
-    
-       document.title=Turret.angle;
-     }
+  
+      keys[e.which] = true;
+      
+      keyActions();
+  
+  }).keyup(function(e){
+  
+      // maybe use splice instead?
+      delete keys[e.which];
+      
+      keyActions();
   
   });
 
 });
+
+var keys={};
+
+function keyActions(){
+
+  var html = '';
+  for (var i in keys) {
+      if (!keys.hasOwnProperty(i)) continue;
+      html += '<p>' + i + '</p>';
+      
+      console.log(i);
+      
+      if(!paused && started){
+        if(i==37)
+          Turret.angle -= 5;
+        if(i==39)
+          Turret.angle += 5;
+        if(i==38)
+          Turret.length -= 5;
+        if(i==40)
+          Turret.length += 5;
+       }
+        // start game if user presses enter
+        if(i==13){
+          if(!started){
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            started=true;
+            animate();
+          }
+        }
+        if(i==32){
+          if(!paused && started){
+            var shot = Object.create(Snowball);
+            // align shot with center of player
+            //shot.x = player.x
+            // start shot at tip of player
+            //shot.y = player.y - player.width - shot.width;
+            
+            shot.x = Turret.x;
+            shot.y = Turret.y;
+            
+            shot.x = canvas.width / 2 - shot.width;
+            shot.y = canvas.height / 2 - shot.width;
+            
+            shot.angle = Turret.angle;
+            shot.length = Turret.length;
+            
+            fired.push(shot);
+          }
+        }
+        if(i==80){
+          if(started){
+            paused=!paused;
+            if(!paused)
+              animate();
+          }
+        }
+      
+        if(Turret.angle > 360)
+          Turret.angle -= 360;
+        else if(Turret.angle < -360)
+          Turret.angle += 360;
+      
+         document.title=Turret.angle;
+       
+  }
+  $('#out').html(html);
+
+}
 
     
 function calculate_turret(){
@@ -156,9 +184,9 @@ return;
 if(!started)
   return;
 var message = (e.clientX - rect.left) + ", " + (e.clientY - rect.top);
-context.clearRect(0, 0, canvas.width, canvas.height);
-context.textAlign = 'left';
-context.fillText(message, 10, 25);
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+ctx.textAlign = 'left';
+ctx.fillText(message, 10, 25);
 }
 
 
@@ -166,32 +194,32 @@ var x_max = false;
 var y_max = false;
 function animate()
 {
-context.fillStyle = "rgba(255, 255, 255, 0.5)";
-context.strokeStyle = "#000";
-context.lineWidth=2;
+ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+ctx.strokeStyle = "#000";
+ctx.lineWidth=2;
 
 if(paused) {
-  context.fillStyle = 'rgba(255, 255, 255, 0.5)';
-  context.fillRect(0, canvas.height / 2 - 25, canvas.width, 50);
-  context.font = '28pt Calibri';
-  context.fillStyle = '#000';
-  context.textAlign = 'center';
-  context.textBaseline = "middle"; 
-  context.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.fillRect(0, canvas.height / 2 - 25, canvas.width, 50);
+  ctx.font = '28pt Calibri';
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = "middle"; 
+  ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
   return;
 }
 
-context.clearRect(0, 0, canvas.width, canvas.height);
-context.globalCompositeOperation='source-over';
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+ctx.globalCompositeOperation='source-over';
 
-var grd = context.createLinearGradient(0, 0, 0, canvas.height);
+var grd = ctx.createLinearGradient(0, 0, 0, canvas.height);
 grd.addColorStop(0, "#1e5a97");
 grd.addColorStop(0.5, "#62a7ee");
 grd.addColorStop(1, "#1e5a97");
 
-context.fillStyle = grd;
-context.fillRect(0, 0, canvas.width, canvas.height);
-context.fillStyle = "rgba(255, 255, 255, 0.5)";
+ctx.fillStyle = grd;
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
 
 if((player.x + player.width) > canvas.width)
   x_max = true;
@@ -218,25 +246,25 @@ player.y = mouse_y;
 
 calculate_turret();
 
-context.beginPath();
-context.arc(player.x, player.y, player.width, 1.5 * Math.PI , 2 * Math.PI + 1.5 * Math.PI);
-context.fill();
-context.stroke();
+ctx.beginPath();
+ctx.arc(player.x, player.y, player.width, 1.5 * Math.PI , 2 * Math.PI + 1.5 * Math.PI);
+ctx.fill();
+ctx.stroke();
 
-context.beginPath();
-context.lineWidth=5;
-context.moveTo(player.x, player.y-player.width);
-//context.lineTo(player.x+Turret.x, player.y-player.width+Turret.y);
-context.lineTo(Turret.x, Turret.y);
-context.stroke();
-context.lineWidth=2;
-//context.beginPath();
+ctx.beginPath();
+ctx.lineWidth=5;
+ctx.moveTo(player.x, player.y-player.width);
+//ctx.lineTo(player.x+Turret.x, player.y-player.width+Turret.y);
+ctx.lineTo(Turret.x, Turret.y);
+ctx.stroke();
+ctx.lineWidth=2;
+//ctx.beginPath();
 
-//context.fillRect(player.x, player.y, player.width, player.height);
+//ctx.fillRect(player.x, player.y, player.width, player.height);
 
-//context.fillRect(player.x + 20, player.y, player.width, player.height);
-//context.fillRect(player.x, player.y + 20, player.width, player.height);
-//context.fillRect(player.x + 20, player.y + 20, player.width, player.height);
+//ctx.fillRect(player.x + 20, player.y, player.width, player.height);
+//ctx.fillRect(player.x, player.y + 20, player.width, player.height);
+//ctx.fillRect(player.x + 20, player.y + 20, player.width, player.height);
 
 var shot_count = fired.length;
 
@@ -276,11 +304,11 @@ if(shot_count)
       shot.y += Math.sin(angle) * speed;
     }
     
-    context.beginPath();
-    context.arc(shot.x, shot.y, shot.width, 1.5 * Math.PI , 2 * Math.PI + 1.5 * Math.PI);
-    context.fill();
-    context.stroke();
-    //context.fillRect(shot.x, shot.y, shot.width, shot.height);
+    ctx.beginPath();
+    ctx.arc(shot.x, shot.y, shot.width, 1.5 * Math.PI , 2 * Math.PI + 1.5 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+    //ctx.fillRect(shot.x, shot.y, shot.width, shot.height);
     
     var top_hit = (shot.y + shot.height) <= 0;
     var bottom_hit = (shot.y - shot.height) >= canvas.height;
@@ -316,6 +344,7 @@ request_frame(function() {
 
 <canvas id="game" onmousemove="return;movePlayer(event)" width=1000 height=700></canvas>
 
+<div id="out"></div>
 
 </body>
 </html>
