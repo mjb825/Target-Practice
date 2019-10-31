@@ -31,20 +31,24 @@ var speed = 1;
 var origin = {"x": 490, "y": 0};
 
 var turret={};
-turret.x=490;
+turret.x=500;
 turret.y=0;
 turret.length=80;
 turret.angle=90;
 
 var shot={};
 
+shot.width=10;
+shot.height=10;
+
 function calculate_shot()
 {
 
   var angle = turret.angle / 180 * Math.PI;
   
-  shot.x = turret.length*Math.cos(angle) + turret.x;
-  shot.y = turret.length*Math.sin(angle) + turret.y;
+  shot.x = 1000 - (turret.length*Math.cos(angle) + turret.x) - (shot.width / 2);
+  //shot.x = (turret.length*Math.cos(angle) + turret.x);
+  shot.y = 700 - (turret.length*Math.sin(angle) + turret.y) - (shot.height / 2);
 
 }
 
@@ -92,9 +96,9 @@ $(document).ready(function(){
       // -5 (half of bullet width) -20 (border of game field)
       //.css("left", e.clientX-offset.left-5-20+"px")
       //.css("top", e.clientY-offset.top-5-20+"px")
-      .css("right", shot.x+"px")
+      .css("left", shot.x+"px")
       //.css("top", offset.top+"px")
-      .css("bottom", shot.y+"px")
+      .css("top", shot.y+"px")
       .data("angle", turret.angle)
       .appendTo($(this));
     
@@ -117,6 +121,8 @@ $(document).ready(function(){
 
 
 <div id="game">
+
+<div id="pos"></div>
 
 <div id="turret"><div id="barrel"></div></div>
 
