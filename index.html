@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Snowball Practice</title>
+<title>snowball Practice</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <style type="text/css">
 body {
@@ -30,18 +30,26 @@ player.y=0;
 player.width=30;
 player.height=30;
 
-var Snowball = {};
+var snowball = {};
 
-Snowball.x=0;
-Snowball.y=0;
-Snowball.width=10;
-Snowball.height=10;
+snowball.x=0;
+snowball.y=0;
+snowball.width=10;
+snowball.height=10;
 
-var Turret = {};
-Turret.x = 0;
-Turret.y = 0;
-Turret.length = 0;
-Turret.angle = 90;
+var turret = {};
+turret.x = 0;
+turret.y = 0;
+turret.length = 0;
+turret.angle = 90;
+
+target = {};
+target.x = 10;
+target.y = 10;
+target.width = 200;
+target.height = 60;
+target.speed = 3;
+target.hit = false;
 
 var request_frame = (function(callback)
 {
@@ -72,6 +80,28 @@ $(document).ready(function(){
     var rect = canvas.getBoundingClientRect();
     mouse_x = e.clientX - rect.left;
     mouse_y = e.clientY - rect.top;
+    
+  }).click(function(e){
+
+          if(!paused && started){
+            var shot = Object.create(snowball);
+            // align shot with center of player
+            //shot.x = player.x
+            // start shot at tip of player
+            //shot.y = player.y - player.width - shot.width;
+            
+            shot.x = turret.x;
+            shot.y = turret.y;
+            
+            //shot.x = canvas.width / 2 - shot.width;
+            //shot.y = canvas.height / 2 - shot.width;
+            
+            shot.angle = turret.angle;
+            shot.length = turret.length;
+            shot.speed = Math.random() * 3 + 1.5;
+            
+            fired.push(shot);
+          }
     
   }).keydown(function(e){
   
@@ -104,13 +134,13 @@ function keyActions(){
       
       if(!paused && started){
         if(i==37)
-          Turret.angle -= 5;
+          turret.angle -= 5;
         if(i==39)
-          Turret.angle += 5;
+          turret.angle += 5;
         if(i==38)
-          Turret.length -= 5;
+          turret.length -= 5;
         if(i==40)
-          Turret.length += 5;
+          turret.length += 5;
        }
         // start game if user presses enter
         if(i==13){
@@ -122,20 +152,21 @@ function keyActions(){
         }
         if(i==32){
           if(!paused && started){
-            var shot = Object.create(Snowball);
+            var shot = Object.create(snowball);
             // align shot with center of player
             //shot.x = player.x
             // start shot at tip of player
             //shot.y = player.y - player.width - shot.width;
             
-            shot.x = Turret.x;
-            shot.y = Turret.y;
+            shot.x = turret.x;
+            shot.y = turret.y;
             
             shot.x = canvas.width / 2 - shot.width;
             shot.y = canvas.height / 2 - shot.width;
             
-            shot.angle = Turret.angle;
-            shot.length = Turret.length;
+            shot.angle = turret.angle;
+            shot.length = turret.length;
+            shot.speed = Math.random() * 3 + 1.5;
             
             fired.push(shot);
           }
@@ -148,12 +179,12 @@ function keyActions(){
           }
         }
       
-        if(Turret.angle > 360)
-          Turret.angle -= 360;
-        else if(Turret.angle < -360)
-          Turret.angle += 360;
+        if(turret.angle > 360)
+          turret.angle -= 360;
+        else if(turret.angle < -360)
+          turret.angle += 360;
       
-         document.title=Turret.angle;
+         document.title=turret.angle;
        
   }
   $('#out').html(html);
@@ -166,10 +197,10 @@ function calculate_turret(){
   var x = player.x;
   var y = player.y - player.width;
   
-  var angle = Turret.angle / 180 * Math.PI;
+  var angle = turret.angle / 180 * Math.PI;
   
-  Turret.x = Turret.length*Math.cos(angle) + x;
-  Turret.y = Turret.length*Math.sin(angle) + y;
+  turret.x = turret.length*Math.cos(angle) + x;
+  turret.y = turret.length*Math.sin(angle) + y;
 
 }
 
@@ -192,6 +223,9 @@ ctx.fillText(message, 10, 25);
 
 var x_max = false;
 var y_max = false;
+var t_x_max = false;
+var t_y_max = false;
+
 function animate()
 {
 ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
@@ -220,6 +254,38 @@ grd.addColorStop(1, "#1e5a97");
 ctx.fillStyle = grd;
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+
+
+// +- 5 for padding
+if((target.x + target.width + 10) > canvas.width){
+  t_x_max = true;
+  target.speed = Math.random() * 8 + 1.5;
+}
+else if((target.x - 10) < 0){
+  t_x_max = false;
+  target.speed = Math.random() * 8 + 1.5;
+}
+
+
+
+if(t_x_max)
+  target.x -= target.speed;
+else
+  target.x += target.speed;
+
+
+if(target.hit)
+  ctx.fillStyle = "#f00";
+
+target.x = canvas.width/2 - (target.width / 2);
+target.y = canvas.height/2 - (target.height / 2);
+
+ctx.fillRect(target.x, target.y, target.width, target.height);
+ctx.strokeRect(target.x, target.y, target.width, target.height);
+
+
+ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+
 
 if((player.x + player.width) > canvas.width)
   x_max = true;
@@ -254,8 +320,8 @@ ctx.stroke();
 ctx.beginPath();
 ctx.lineWidth=5;
 ctx.moveTo(player.x, player.y-player.width);
-//ctx.lineTo(player.x+Turret.x, player.y-player.width+Turret.y);
-ctx.lineTo(Turret.x, Turret.y);
+//ctx.lineTo(player.x+turret.x, player.y-player.width+turret.y);
+ctx.lineTo(turret.x, turret.y);
 ctx.stroke();
 ctx.lineWidth=2;
 //ctx.beginPath();
@@ -281,8 +347,8 @@ if(shot_count)
     //shot.x -= .5;
     
     /*
-    var angle = Turret.angle / 180 * Math.PI;
-    if(Turret.length < 0){
+    var angle = turret.angle / 180 * Math.PI;
+    if(turret.length < 0){
       shot.x -= Math.cos(angle);
       shot.y -= Math.sin(angle);
     }
@@ -295,13 +361,13 @@ if(shot_count)
     var speed = 1.1;
     var angle = shot.angle / 180 * Math.PI;
     
-    if(Turret.length <= 0){
-      shot.x -= Math.cos(angle) * speed;
-      shot.y -= Math.sin(angle) * speed;
+    if(turret.length <= 0){
+      shot.x -= Math.cos(angle) * shot.speed;
+      shot.y -= Math.sin(angle) * shot.speed;
     }
     else{
-      shot.x += Math.cos(angle) * speed;
-      shot.y += Math.sin(angle) * speed;
+      shot.x += Math.cos(angle) * shot.speed;
+      shot.y += Math.sin(angle) * shot.speed;
     }
     
     ctx.beginPath();
@@ -314,9 +380,13 @@ if(shot_count)
     var bottom_hit = (shot.y - shot.height) >= canvas.height;
     var left_hit = (shot.x + shot.height) <= 0;
     var right_hit = (shot.x - shot.height) >= canvas.width;
+    var target_hit = ( (shot.x+shot.width >= target.x) && (shot.x-shot.width <= (target.x + target.width)) ) && ((shot.y+shot.width >= target.y) && (shot.y-shot.width <= (target.y + target.height)));
     
-    //if(top_hit || bottom_hit || left_hit || right_hit)
-    if(false)
+    if(!target.hit && target_hit)
+      target.hit = target_hit;
+    
+    //if(false)
+    if(top_hit || bottom_hit || left_hit || right_hit || target_hit)
     {
       // remove element from fired array if it goes off screen
       fired.splice(i, 1);

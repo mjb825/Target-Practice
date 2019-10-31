@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Target Practice</title>
+<meta charset="utf-8">
+<style type="text/css">
+* {
+  box-sizing: border-box;
+}
+
+#game {
+  border: 1px solid #000;
+  width: 800px;
+  height: 700px;
+  margin: auto;
+  position: relative;
+}
+
+.bullet {
+  border: 1px solid #000;
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+  display: inline-block;
+  position: absolute;
+}
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+
+function bullet(x, y, offset)
+{
+  var bullet=document.createElement("div");
+  bullet.className="bullet";
+  bullet.style.left=x-offset.left-5+"px";
+  bullet.style.top=y-offset.top-5+"px";
+  bullet.dataset.left=x-offset.left-5;
+  bullet.dataset.left="0";
+  return bullet;
+}
+
+var player = {};
+player.x = 0;
+player.y = 0;
+
+var started = false;
+
+$(document).ready(function(){
+
+  $("#game").click(function(e){
+    //$(this).append(bullet(e.clientX, e.clientY, $(this).offset()));
+    
+    //alert($(".bullet").attr("data-x"));
+    //$(".bullet").css("background","red");
+    
+    
+    //$(".bullet").css("left","-=8");
+    //$(".bullet").css("left",$(".bullet").attr("data-left"));
+    
+    //console.log($(".bullet").attr("data-left"));
+    
+    var offset = $(this).offset();
+    
+    $("<div>")
+      .addClass("bullet")
+      .css("left", e.clientX-offset.left-5+"px")
+      .css("top", e.clientY-offset.top-5+"px")
+      .appendTo($(this));
+    
+    if(!started)
+    {
+      started=true;
+      animate();
+    }
+    
+  }).mousemove(function(e){
+  
+    var offset = $(this).offset();
+    player.x = e.clientX - offset.left;
+    player.y = e.clientY - offset.top;
+  
+    //console.log(e.clientX - offset.left);
+  
+  });
+  
+  
+});
+</script>
+
+
+</head>
+
+<body>
+
+
+<div id="game">
+
+<div class="bullet" data-left="32"></div>
+
+</div>
+
+<script>
+var request_frame = (function(callback)
+{
+  return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) {window.setTimeout(callback, 1000 / 60);};
+})();
+
+var i = 0;
+
+function add(str, value)
+{
+
+}
+
+function animate()
+{
+
+
+//alert(e.clientX-offset.left);
+//e.clientY-offset.top
+
+  //$(".bullet").animate({left: player.x, top: player.y}, 0);
+
+//alert(parseFloat($(".bullet").attr("data-left")));
+
+//$(".bullet").css("left", parseFloat($(this).attr("data-left")) - 5 );
+
+//for(var i = 0; i < 
+
+//  $(".bullet").animate()
+
+$(".bullet").each(function()
+{
+
+  $(this).css("top", "-=5");
+
+});
+
+request_frame(function()
+{
+  animate();
+});
+
+}
+
+requestAnimFrame(function() {
+  animate();
+});
+</script>
+
+
+</body>
