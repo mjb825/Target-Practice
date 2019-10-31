@@ -26,8 +26,27 @@ var started = false;
 // offset of game field
 var offset;
 
-var angle = 90;
 var speed = 1;
+
+var origin = {"x": 490, "y": 0};
+
+var turret={};
+turret.x=490;
+turret.y=0;
+turret.length=80;
+turret.angle=90;
+
+var shot={};
+
+function calculate_shot()
+{
+
+  var angle = turret.angle / 180 * Math.PI;
+  
+  shot.x = turret.length*Math.cos(angle) + turret.x;
+  shot.y = turret.length*Math.sin(angle) + turret.y;
+
+}
 
 $(document).ready(function(){
 
@@ -35,18 +54,18 @@ $(document).ready(function(){
   {
   
     if(e.keyCode==37)
-      angle -= 5;
+      turret.angle -= 5;
     if(e.keyCode==39)
-      angle += 5;
+      turret.angle += 5;
   
-    if(angle <= 20)
-      angle = 20;
-    else if(angle >= 160)
-      angle = 160;
+    if(turret.angle <= 20)
+      turret.angle = 20;
+    else if(turret.angle >= 160)
+      turret.angle = 160;
   
-    document.title=angle;
+    document.title=turret.angle;
   
-    $("#turret").css("transform", "rotate(" + angle + "deg)");
+    $("#turret").css("transform", "rotate(" + turret.angle + "deg)");
     
   });
 
@@ -66,15 +85,17 @@ $(document).ready(function(){
     
     offset = $("#turret").offset();
     
+    calculate_shot();
+    
     $("<div>")
       .addClass("bullet")
       // -5 (half of bullet width) -20 (border of game field)
       //.css("left", e.clientX-offset.left-5-20+"px")
       //.css("top", e.clientY-offset.top-5-20+"px")
-      .css("left", offset.left-456+"px")
+      .css("right", shot.x+"px")
       //.css("top", offset.top+"px")
-      .css("bottom", "10px")
-      .data("angle", angle)
+      .css("bottom", shot.y+"px")
+      .data("angle", turret.angle)
       .appendTo($(this));
     
     if(!started)

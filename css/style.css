@@ -8,10 +8,10 @@
 }
 
 .bullet {
-  border: 1px solid #000;
-  width: 10px;
-  height: 10px;
-  border-radius: 10px;
+  border: 1px solid #f00;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
   display: inline-block;
   position: absolute;
 }
