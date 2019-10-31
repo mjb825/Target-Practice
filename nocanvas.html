@@ -19,9 +19,6 @@ function bullet(x, y, offset)
   return bullet;
 }
 
-var player = {};
-player.x = 0;
-player.y = 0;
 
 // has game started yet
 var started = false;
@@ -67,13 +64,17 @@ $(document).ready(function(){
     
     
     
-    offset = $(this).offset();
+    offset = $("#turret").offset();
     
     $("<div>")
       .addClass("bullet")
       // -5 (half of bullet width) -20 (border of game field)
-      .css("left", e.clientX-offset.left-5-20+"px")
-      .css("top", e.clientY-offset.top-5-20+"px")
+      //.css("left", e.clientX-offset.left-5-20+"px")
+      //.css("top", e.clientY-offset.top-5-20+"px")
+      .css("left", offset.left-456+"px")
+      //.css("top", offset.top+"px")
+      .css("bottom", "10px")
+      .data("angle", angle)
       .appendTo($(this));
     
     if(!started)
@@ -82,14 +83,6 @@ $(document).ready(function(){
       animate();
     }
     
-  }).mousemove(function(e){
-  
-    var offset = $(this).offset();
-    player.x = e.clientX - offset.left;
-    player.y = e.clientY - offset.top;
-  
-    //console.log(e.clientX - offset.left);
-  
   });
   
   
@@ -104,11 +97,7 @@ $(document).ready(function(){
 
 <div id="game">
 
-<div class="bullet" data-left="32"></div>
-
-<div id="turret">
-<div id="barrel"></div>
-</div>
+<div id="turret"><div id="barrel"></div></div>
 
 </div>
 
@@ -145,6 +134,8 @@ function animate()
 $(".bullet").each(function()
 {
 
+  var angle = $(this).data("angle");
+
   var direction = angle / 180 * Math.PI;
 
   $(this).css("left", "-=" + (Math.cos(direction) * speed) );
@@ -158,6 +149,7 @@ $(".bullet").each(function()
   var left_hit = (x + 10) <= 0;
   var right_hit = (x) >= 1000;
   
+  bottom_hit = false;
   
   if(top_hit || bottom_hit || left_hit || right_hit)
     $(this).remove();
