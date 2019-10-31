@@ -3,28 +3,7 @@
 <head>
 <title>Target Practice</title>
 <meta charset="utf-8">
-<style type="text/css">
-* {
-  box-sizing: border-box;
-}
-
-#game {
-  border: 1px solid #000;
-  width: 800px;
-  height: 700px;
-  margin: auto;
-  position: relative;
-}
-
-.bullet {
-  border: 1px solid #000;
-  width: 10px;
-  height: 10px;
-  border-radius: 10px;
-  display: inline-block;
-  position: absolute;
-}
-</style>
+<link rel="stylesheet" type="text/css" href="css/style.css">
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script>
@@ -44,9 +23,35 @@ var player = {};
 player.x = 0;
 player.y = 0;
 
+// has game started yet
 var started = false;
 
+// offset of game field
+var offset;
+
+var angle = 90;
+var speed = 1;
+
 $(document).ready(function(){
+
+  $(document).keydown(function(e)
+  {
+  
+    if(e.keyCode==37)
+      angle -= 5;
+    if(e.keyCode==39)
+      angle += 5;
+  
+    if(angle <= 20)
+      angle = 20;
+    else if(angle >= 160)
+      angle = 160;
+  
+    document.title=angle;
+  
+    $("#turret").css("transform", "rotate(" + angle + "deg)");
+    
+  });
 
   $("#game").click(function(e){
     //$(this).append(bullet(e.clientX, e.clientY, $(this).offset()));
@@ -60,12 +65,15 @@ $(document).ready(function(){
     
     //console.log($(".bullet").attr("data-left"));
     
-    var offset = $(this).offset();
+    
+    
+    offset = $(this).offset();
     
     $("<div>")
       .addClass("bullet")
-      .css("left", e.clientX-offset.left-5+"px")
-      .css("top", e.clientY-offset.top-5+"px")
+      // -5 (half of bullet width) -20 (border of game field)
+      .css("left", e.clientX-offset.left-5-20+"px")
+      .css("top", e.clientY-offset.top-5-20+"px")
       .appendTo($(this));
     
     if(!started)
@@ -98,6 +106,10 @@ $(document).ready(function(){
 
 <div class="bullet" data-left="32"></div>
 
+<div id="turret">
+<div id="barrel"></div>
+</div>
+
 </div>
 
 <script>
@@ -108,7 +120,7 @@ var request_frame = (function(callback)
 
 var i = 0;
 
-function add(str, value)
+function get_value(str, value)
 {
 
 }
@@ -133,7 +145,23 @@ function animate()
 $(".bullet").each(function()
 {
 
-  $(this).css("top", "-=5");
+  var direction = angle / 180 * Math.PI;
+
+  $(this).css("left", "-=" + (Math.cos(direction) * speed) );
+  $(this).css("top", "-=" + (Math.sin(direction) * speed) );
+  
+  var x = (parseFloat($(this).css("left")));
+  var y = (parseFloat($(this).css("top")));
+  
+  var top_hit = (y + 10) <= 0;
+  var bottom_hit = (y) >= 700;
+  var left_hit = (x + 10) <= 0;
+  var right_hit = (x) >= 1000;
+  
+  
+  if(top_hit || bottom_hit || left_hit || right_hit)
+    $(this).remove();
+  
 
 });
 
@@ -144,9 +172,7 @@ request_frame(function()
 
 }
 
-requestAnimFrame(function() {
-  animate();
-});
+
 </script>
 
 

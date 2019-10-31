@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Testing</title>
+<meta charset="utf-8">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+
+$(document).ready(function()
+{
+
+  document.title="ready";
+  
+  $(document).keydown(function(e)
+  {
+    if(e.keyCode==37)
+      document.title="LEFT";
+    if(e.keyCode==39)
+      document.title="RIGHT";
+  });
+
+});
+
+</script>
+</head>
+
+<body>
+
+</body>
+</html>

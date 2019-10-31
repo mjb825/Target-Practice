@@ -1,0 +1,43 @@
+#game {
+  background: linear-gradient(#1e5a97, #62a7ee, #1e5a97);
+  border: 20px solid #000;
+  width: 1000px;
+  height: 700px;
+  margin: auto;
+  position: relative;
+}
+
+.bullet {
+  border: 1px solid #000;
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+  display: inline-block;
+  position: absolute;
+}
+
+#turret {
+  background: #000;
+  width: 80px;
+  height: 20px;
+  position: absolute;
+  bottom: -20px;
+  left: 420px;
+  border-radius: 999px 0 0 999px;
+  transform-origin: 100% 50%;
+  transform: rotate(90deg);
+}
+
+#barrel {
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  /*
+  2px:
+  turret width (20) / 2 - barrel width (16) / 2
+  */
+  left: 2px;
+  top: 2px;
+  background: #777;
+  border-radius: 999px;
+}
