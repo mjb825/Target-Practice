@@ -43,7 +43,7 @@ function calculate_shot()
 $(document).ready(function()
 {
 
-  $("#game")
+  $("#game, #game_frame")
     .width(game.width)
     .height(game.height);
 
@@ -108,6 +108,8 @@ $(document).ready(function()
 
 <body>
 
+<div id="game_frame"></div>
+
 <div id="game">
   <div id="turret"></div>
 </div>
@@ -143,9 +145,10 @@ function animate()
     
     if(top_hit || bottom_hit || left_hit || right_hit)
       $(this).remove();
-    
 
   });
+
+  document.title = $(".bullet").length;
 
   request_frame(function()
   {
