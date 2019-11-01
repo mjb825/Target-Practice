@@ -7,12 +7,10 @@
 <script type="application/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script type="application/javascript">
 
-// has game started yet
-var started = false;
-
 var game = {};
 game.width=1000;
 game.height=700;
+game.started=false;
 
 var turret={};
 turret.width=22;
@@ -63,35 +61,62 @@ $(document).ready(function()
   $(document).keydown(function(e)
   {
   
+    // [enter] to start game
+    if(e.keyCode == 13)
+    {
+      if(!game.started)
+      {
+        $("#message").hide();
+        $("#turret").show();
+        game.started=true;
+        animate();
+      }
+    }
     // [left arrow] to decrease angle of turret
-    if(e.keyCode==37)
-      turret.angle -= 5;
+    else if(e.keyCode==37)
+    {
+      if(!game.paused && game.started)
+        turret.angle -= 5;
+    }
     // [right arrow] to increase angle of turret
     else if(e.keyCode==39)
-      turret.angle += 5;
+    {
+      if(!game.paused && game.started)
+        turret.angle += 5;
+    }
     // [space] to shoot
     else if(e.keyCode==32)
     {
-    
-      // calculate starting position of shot
-      calculate_shot();
-      
-      // create and append shot
-      $("<div>")
-        .addClass("bullet")
-        .css("left", shot.x+"px")
-        .css("top", shot.y+"px")
-        .width(shot.width)
-        .height(shot.height)
-        .data("angle", turret.angle)
-        .appendTo($("#game"));
-      
-      if(!started)
+      if(!game.paused && game.started)
       {
-        started=true;
-        animate();
+        // calculate starting position of shot
+        calculate_shot();
+        
+        // create and append shot
+        $("<div>")
+          .addClass("bullet")
+          .css("left", shot.x+"px")
+          .css("top", shot.y+"px")
+          .width(shot.width)
+          .height(shot.height)
+          .data("angle", turret.angle)
+          .appendTo($("#game"));
       }
-    
+    }
+    // [p] to pause game
+    else if(e.keyCode==80)
+    {
+      if(game.started)
+      {
+        game.paused=!game.paused;
+        if(!game.paused)
+        {
+          $("#pause").hide();
+          animate();
+        }
+        else
+          $("#pause").show();
+      }
     }
   
     // limit degree of turret
@@ -134,6 +159,11 @@ var request_frame = (function(callback)
 
 function animate()
 {
+
+  if(game.paused)
+  {
+    return;
+  }
 
   $(".bullet").each(function()
   {
