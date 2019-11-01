@@ -19,10 +19,14 @@ turret.width=22;
 turret.length=200;
 turret.angle=90;
 turret.x=game.width / 2;
+// offset (0 = edge of game field, 0.5 = half-way outside game field, 1 = fully outside gamefield) 
+// value of 0 you can see the edge of turret when it rotates, 0.5 is MOST EFFECTIVE for hiding this, and > 0.5 is not needed
+// and negative value moves it further inside the game field
+turret.offset=0.5;
 //turret.width / 2 because 0 is the edge of the screen, but in order for the shots to align with the turret, the transform of the turret moves it away from the edge
 // turret width of 20 with a bottom-position of -10 (move down 20/2) moves the turret to the edge (i.e., 0)
 // so moving it down one more half of turret width 10 (20/2), allows us to hide the bottom edge of turret in the game's border when it rotates
-turret.y=0 - (turret.width / 2);
+turret.y=0 - (turret.width * turret.offset);
 
 var shot={};
 shot.width=22;
@@ -52,7 +56,7 @@ $(document).ready(function()
     .height(turret.width)
     .css
       ({
-        "bottom": "-" + turret.width/1 + "px",
+        "bottom": -1 * (turret.width * (turret.offset + 0.5)) + "px",
         "left": game.width/2 - turret.length + "px"
       });
 
@@ -91,7 +95,6 @@ $(document).ready(function()
     }
   
     // limit degree of turret
-    
     if(turret.angle <= 20)
       turret.angle = 20;
     else if(turret.angle >= 160)
