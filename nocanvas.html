@@ -10,16 +10,24 @@
 // has game started yet
 var started = false;
 
+var game = {};
+game.width=1000;
+game.height=700;
+
 var turret={};
-turret.x=500;
-turret.y=0;
-turret.length=80;
+turret.width=22;
+turret.length=200;
 turret.angle=90;
+turret.x=game.width / 2;
+//turret.width / 2 because 0 is the edge of the screen, but in order for the shots to align with the turret, the transform of the turret moves it away from the edge
+// turret width of 20 with a bottom-position of -10 (move down 20/2) moves the turret to the edge (i.e., 0)
+// so moving it down one more half of turret width 10 (20/2), allows us to hide the bottom edge of turret in the game's border when it rotates
+turret.y=0 - (turret.width / 2);
 
 var shot={};
-shot.width=10;
-shot.height=10;
-shot.speed=1;
+shot.width=22;
+shot.height=22;
+shot.speed=2;
 
 // calculate starting position of shot based off of turret's current position
 function calculate_shot()
@@ -27,12 +35,26 @@ function calculate_shot()
 
   var angle = turret.angle / 180 * Math.PI;
   
-  shot.x = 1000 - (turret.length * Math.cos(angle) + turret.x) - (shot.width / 2);
-  shot.y = 700 - (turret.length * Math.sin(angle) + turret.y) - (shot.height / 2);
+  shot.x = game.width - (turret.length * Math.cos(angle) + turret.x) - (shot.width / 2);
+  shot.y = game.height - (turret.length * Math.sin(angle) + turret.y) - (shot.height / 2);
 
 }
 
-$(document).ready(function(){
+$(document).ready(function()
+{
+
+  $("#game")
+    .width(game.width)
+    .height(game.height);
+
+  $("#turret")
+    .width(turret.length)
+    .height(turret.width)
+    .css
+      ({
+        "bottom": "-" + turret.width/1 + "px",
+        "left": game.width/2 - turret.length + "px"
+      });
 
   $(document).keydown(function(e)
   {
@@ -55,6 +77,8 @@ $(document).ready(function(){
         .addClass("bullet")
         .css("left", shot.x+"px")
         .css("top", shot.y+"px")
+        .width(shot.width)
+        .height(shot.height)
         .data("angle", turret.angle)
         .appendTo($("#game"));
       
@@ -67,12 +91,12 @@ $(document).ready(function(){
     }
   
     // limit degree of turret
-    /*
+    
     if(turret.angle <= 20)
       turret.angle = 20;
     else if(turret.angle >= 160)
       turret.angle = 160;
-    */
+    
   
     $("#turret").css("transform", "rotate(" + turret.angle + "deg)");
     
@@ -85,7 +109,7 @@ $(document).ready(function(){
 <body>
 
 <div id="game">
-  <div id="turret"><div id="barrel"></div></div>
+  <div id="turret"></div>
 </div>
 
 <script type="application/javascript">
@@ -100,20 +124,22 @@ function animate()
   $(".bullet").each(function()
   {
 
-    var angle = $(this).data("angle");
-
-    var direction = angle / 180 * Math.PI;
-
-    $(this).css("left", "-=" + (Math.cos(direction) * shot.speed) );
-    $(this).css("top", "-=" + (Math.sin(direction) * shot.speed) );
+    var angle = $(this).data("angle") / 180 * Math.PI;
+    
+    $(this).css(
+    {
+      "left": "-=" + (Math.cos(angle) * shot.speed),
+      "top": "-=" + (Math.sin(angle) * shot.speed)
+    });
     
     var x = (parseFloat($(this).css("left")));
     var y = (parseFloat($(this).css("top")));
     
-    var top_hit = (y + 10) <= 0;
-    var bottom_hit = (y) >= 700;
-    var left_hit = (x + 10) <= 0;
-    var right_hit = (x) >= 1000;
+    // offset needed for top and left because that's where the origin is located
+    var top_hit = (y + shot.height) <= 0;
+    var bottom_hit = (y) >= game.height;
+    var left_hit = (x + shot.width) <= 0;
+    var right_hit = (x) >= game.width;
     
     if(top_hit || bottom_hit || left_hit || right_hit)
       $(this).remove();

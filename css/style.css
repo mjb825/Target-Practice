@@ -1,56 +1,22 @@
 #game {
   background: linear-gradient(#1e5a97, #62a7ee, #1e5a97);
   border: 20px solid #000;
-  width: 1000px;
-  height: 700px;
   margin: auto;
   position: relative;
 }
 
 .bullet {
-  border: 1px solid #f00;
-  background: #900;
-  width: 10px;
-  height: 10px;
+  border: 2px solid #000;
+  background: rgba(0, 0, 0, 0.5);
   display: inline-block;
   position: absolute;
   box-sizing: border-box;
+  border-radius: 9999px;
 }
 
 #turret {
   background: #000;
-  width: 80px;
-  height: 10px;
   position: absolute;
-  bottom: -5px;
-  left: 420px;
   transform-origin: 100% 50%;
   transform: rotate(90deg);
-}
-
-#barrel {
-  display: none;
-  width: 16px;
-  height: 16px;
-  position: absolute;
-  /*
-  2px:
-  turret width (20) / 2 - barrel width (16) / 2
-  */
-  left: 2px;
-  top: 2px;
-  background: #777;
-  border-radius: 999px;
-}
-
-#pos {
-  display: none;
-  background: red;
-  width: 10px;
-  height: 10px;
-  /* 700 - 80 - 5*/
-  top: 615px;
-  /* 1000 / 2 - 5 */
-  left: 495px;
-  position: absolute;
 }
