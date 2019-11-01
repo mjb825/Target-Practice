@@ -52,15 +52,30 @@ $(document).ready(function()
   $("#turret")
     .width(turret.length)
     .height(turret.width)
-    .css
-      ({
+    .css(
+      {
         "bottom": -1 * (turret.width * (turret.offset + 0.5)) + "px",
         "left": game.width/2 - turret.length + "px"
       });
+      
+  $(".target").data(
+  {
+  "hit": false,
+  "timeout": 0
+  });
 
   $(document).keydown(function(e)
   {
+      
   
+    if(e.keyCode==87)
+      turret.length += 10;
+    else if(e.keyCode==83)
+      turret.length -= 10;
+    else if(e.keyCode==38)
+      turret.offset -= .5
+    else if(e.keyCode==40)
+      turret.offset += .5
     // [enter] to start game
     if(e.keyCode == 13)
     {
@@ -120,14 +135,34 @@ $(document).ready(function()
     }
   
     // limit degree of turret
+    /*
     if(turret.angle <= 20)
       turret.angle = 20;
     else if(turret.angle >= 160)
       turret.angle = 160;
-    
+    */
   
+    turret.y=0 - (turret.width * turret.offset);
+    $("#turret")
+      .width(turret.length)
+      .height(turret.width)
+      .css
+        ({
+          "bottom": -1 * (turret.width * (turret.offset + 0.5)) + "px",
+          "left": game.width/2 - turret.length + "px"
+        });
     $("#turret").css("transform", "rotate(" + turret.angle + "deg)");
     
+  }).mousemove(function(e)
+  {
+  
+    var offset = $("#game").offset();
+    $(".target").css(
+    {
+      "left": (e.clientX - offset.left),
+      "top": (e.clientY - offset.top)
+    });
+  
   });
 
 });
@@ -146,8 +181,14 @@ $(document).ready(function()
     <p>Use <span>LEFT</span> and <span>RIGHT</span> arrow keys to adjust turret</p>
     <p>Use <span>SPACEBAR</span> to fire at targets</p>
   </div>
+  
   <div id="pause">PAUSED</div>
+  
   <div id="turret"></div>
+  
+  <div id="targets">
+    <div class="target"></div>
+  </div>
   
 </div>
 
@@ -179,13 +220,43 @@ function animate()
     var x = (parseFloat($(this).css("left")));
     var y = (parseFloat($(this).css("top")));
     
-    // offset needed for top and left because that's where the origin is located
-    var top_hit = (y + shot.height) <= 0;
-    var bottom_hit = (y) >= game.height;
-    var left_hit = (x + shot.width) <= 0;
-    var right_hit = (x) >= game.width;
     
-    if(top_hit || bottom_hit || left_hit || right_hit)
+    // offset needed for top and left because that's where the origin is located
+    var hit =
+    // top boundary
+    ((y + shot.height) <= 0) ||
+    // bottom boundary
+    ((y) >= game.height) ||
+    // left boundary
+    ((x + shot.width) <= 0) ||
+    // right boundary
+    ((x) >= game.width);
+
+    // calculate shot hitting a target if it hasn't already hit a boundary
+    if(!hit)
+    {
+      $(".target").each(function()
+      {
+  
+        var target = {};
+        target.x = (parseFloat($(this).css("left")));
+        target.y = (parseFloat($(this).css("top")));
+        target.width = $(this).width();
+        target.height = $(this).height();
+        
+        var target_hit = ( ((x + shot.width) >= target.x ) && (x <= (target.x + target.width) ) ) && ( ((y + shot.height) >= target.y)  &&  (y <= (target.y + target.height))  );
+      
+        if(target_hit)
+          $(this).data("hit", true);
+      
+        hit = hit || target_hit;
+      
+      });
+    }
+    
+    
+    
+    if(hit)
       $(this).remove();
 
   });
