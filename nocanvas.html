@@ -59,16 +59,20 @@ $(document).ready(function()
         "left": game.width/2 - turret.length + "px"
       });
       
-  $(".target").each(function()
+  $.each($(".target"), function(index, value)
   {
-    $(this).data(
-    {
-      "prev_hit": false,
-      "timeout": 10000,
-      "speed": Math.random()*10+2,
-      "max": false,
-      "value": parseInt($(this).html())
-    });
+    $(this)
+      .data(
+        {
+          "prev_hit": false,
+          "timeout": 10000,
+          "speed": Math.random()*10+2,
+          "max": false,
+          "value": (($(".target").length-index-1)*3+1),
+          "value": Math.pow(2, ($(".target").length-index-1))
+        })
+      .css("top", index*60 + "px")
+      .html($(this).data("value"));
   });
 
   $(document).keydown(function(e)
@@ -143,12 +147,10 @@ $(document).ready(function()
     }
   
     // limit degree of turret
-    /*
     if(turret.angle <= 20)
       turret.angle = 20;
     else if(turret.angle >= 160)
       turret.angle = 160;
-    */
   
     turret.y=0 - (turret.width * turret.offset);
     $("#turret")
@@ -187,11 +189,21 @@ $(document).ready(function()
 <div id="game">
   
   <div id="message">
-    <p>Goal: hit active target within time limit to score points</p>
-    <p>Press <u>ENTER</u> to start game</p>
-    <p style="margin-bottom: 100px;">Press <u>P</u> to pause game</p>
-    <p>Use <u>LEFT</u> and <u>RIGHT</u> arrow keys to adjust turret</p>
-    <p>Use <u>SPACEBAR</u> to fire at targets</p>
+    <p>
+      Goal: score points according to target value
+      <br>
+      (hitting an inactive target won't increase score)
+    </p>
+    <p>
+      Press <u>ENTER</u> to start game
+      <br>
+      Press <u>P</u> to pause game
+    </p>
+    <p>
+      Use <u>LEFT</u> and <u>RIGHT</u> arrow keys to adjust turret
+      <br>
+      Use <u>SPACEBAR</u> to fire at targets
+    </p>
   </div>
   
   <div id="pause">PAUSED</div>
@@ -200,9 +212,12 @@ $(document).ready(function()
   
   <div id="targets">
     <div class="target">10</div>
-    <div class="target" style="top: 60px;">7</div>
-    <div class="target" style="top: 120px;">3</div>
-    <div class="target" style="top: 180px;">1</div>
+    <div class="target">7</div>
+    <div class="target">3</div>
+    <div class="target">1</div>
+    <div class="target">1</div>
+    <div class="target">1</div>
+    <div class="target">1</div>
   </div>
   
 </div>

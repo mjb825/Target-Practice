@@ -43,6 +43,10 @@
   z-index: 3;
 }
 
+#message p {
+  margin-bottom: 60px;
+}
+
 #pause {
   font: 28pt calibri;
   background: #fff;
