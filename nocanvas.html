@@ -30,7 +30,7 @@ turret.y=0 - (turret.width * turret.offset);
 var shot={};
 shot.width=22;
 shot.height=22;
-shot.speed=2;
+shot.speed=4;
 
 // calculate starting position of shot based off of turret's current position
 function calculate_shot()
@@ -59,12 +59,16 @@ $(document).ready(function()
         "left": game.width/2 - turret.length + "px"
       });
       
-  $(".target").data(
+  $(".target").each(function()
   {
-    "prev_hit": false,
-    "timeout": 10000,
-    "speed": Math.random()*10+2,
-    "max": false
+    $(this).data(
+    {
+      "prev_hit": false,
+      "timeout": 10000,
+      "speed": Math.random()*10+2,
+      "max": false,
+      "value": parseInt($(this).html())
+    });
   });
 
   $(document).keydown(function(e)
@@ -86,6 +90,7 @@ $(document).ready(function()
       {
         $("#message").hide();
         $("#turret").show();
+        $("#targets").show();
         game.started=true;
         animate();
       } 
@@ -156,7 +161,9 @@ $(document).ready(function()
         });
     $("#turret").css("transform", "rotate(" + turret.angle + "deg)");
     
-  }).mousemove(function(e)
+  });
+  /*
+  .mousemove(function(e)
   {
   
     var offset = $("#game").offset();
@@ -167,6 +174,7 @@ $(document).ready(function()
     });
   
   });
+  */
 
 });
 </script>
@@ -179,6 +187,7 @@ $(document).ready(function()
 <div id="game">
   
   <div id="message">
+    <p>Goal: hit active target within time limit to score points</p>
     <p>Press <u>ENTER</u> to start game</p>
     <p style="margin-bottom: 100px;">Press <u>P</u> to pause game</p>
     <p>Use <u>LEFT</u> and <u>RIGHT</u> arrow keys to adjust turret</p>
@@ -190,7 +199,10 @@ $(document).ready(function()
   <div id="turret"></div>
   
   <div id="targets">
-    <div class="target"></div>
+    <div class="target">10</div>
+    <div class="target" style="top: 60px;">7</div>
+    <div class="target" style="top: 120px;">3</div>
+    <div class="target" style="top: 180px;">1</div>
   </div>
   
 </div>
@@ -224,7 +236,9 @@ function animate()
     if(timeout >= 3000)
     {
       // allow target to be hit again to increase score
-      $(this).data("prev_hit", false);
+      $(this)
+        .data("prev_hit", false)
+        .css("background-color", "rgba(255, 255, 255, 0.5");
       
       if($(this).data("max"))
       {
@@ -310,10 +324,12 @@ function animate()
           // don't increase score if target is in inactive state
           //[update] adjust score according to target hit
           if(!$(this).data("prev_hit"))
-            game.score++;
+            game.score+=$(this).data("value");
             
           // assign prev_hit value
-          $(this).data("prev_hit", true);
+          $(this)
+            .data("prev_hit", true)
+            .css("background-color", "rgba(0, 0, 0, 0.5)");
         }
       
         hit = hit || target_hit;
