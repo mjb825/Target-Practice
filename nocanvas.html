@@ -11,6 +11,7 @@ var game = {};
 game.width=1000;
 game.height=700;
 game.started=false;
+game.score=0;
 
 var turret={};
 turret.width=22;
@@ -60,7 +61,7 @@ $(document).ready(function()
       
   $(".target").data(
   {
-    "hit": false,
+    "prev_hit": false,
     "timeout": 10000,
     "speed": Math.random()*10+2,
     "max": false
@@ -178,10 +179,10 @@ $(document).ready(function()
 <div id="game">
   
   <div id="message">
-    <p>Press <span>ENTER</span> to start game</p>
-    <p style="margin-bottom: 100px;">Press <span>P</span> to pause game</p>
-    <p>Use <span>LEFT</span> and <span>RIGHT</span> arrow keys to adjust turret</p>
-    <p>Use <span>SPACEBAR</span> to fire at targets</p>
+    <p>Press <u>ENTER</u> to start game</p>
+    <p style="margin-bottom: 100px;">Press <u>P</u> to pause game</p>
+    <p>Use <u>LEFT</u> and <u>RIGHT</u> arrow keys to adjust turret</p>
+    <p>Use <u>SPACEBAR</u> to fire at targets</p>
   </div>
   
   <div id="pause">PAUSED</div>
@@ -222,6 +223,9 @@ function animate()
     // don't move for 3 seconds after target has been hit
     if(timeout >= 3000)
     {
+      // allow target to be hit again to increase score
+      $(this).data("prev_hit", false);
+      
       if($(this).data("max"))
       {
         if(target.x - speed <= 0)
@@ -299,7 +303,18 @@ function animate()
         var target_hit = ( ((x + shot.width) >= target.x ) && (x <= (target.x + target.width) ) ) && ( ((y + shot.height) >= target.y)  &&  (y <= (target.y + target.height))  );
       
         if(target_hit)
+        {
+          // initialize time for target inactivity (even if it gets hit again when inactive, but it won't increase score)
           $(this).data("timeout", new Date());
+          
+          // don't increase score if target is in inactive state
+          //[update] adjust score according to target hit
+          if(!$(this).data("prev_hit"))
+            game.score++;
+            
+          // assign prev_hit value
+          $(this).data("prev_hit", true);
+        }
       
         hit = hit || target_hit;
       
@@ -313,7 +328,8 @@ function animate()
 
   });
 
-  document.title = $(".bullet").length;
+  //document.title = $(".bullet").length;
+  document.title=game.score;
 
   request_frame(function()
   {

@@ -43,12 +43,6 @@
   z-index: 3;
 }
 
-#message span {
-  background: #fff;
-  color: #1e5a97;
-  padding: 0 10px;
-}
-
 #pause {
   font: 28pt calibri;
   background: #fff;
