@@ -61,8 +61,8 @@ $(document).ready(function()
   $(".target").data(
   {
     "hit": false,
-    "timeout": 0,
-    "speed": Math.random()*5+4,
+    "timeout": 10000,
+    "speed": Math.random()*10+2,
     "max": false
   });
 
@@ -214,29 +214,45 @@ function animate()
     var target = {};
     target.x = (parseFloat($(this).css("left")));
     target.width = $(this).width();
-  
-    if($(this).data("max"))
-    {
-      if(target.x - 4 <= 0)
-      {
-        $(this).css("left", 0);
-        $(this).data("max", false);
-      }
-      else
-        $(this).css("left", "-=4");   
-    }
-    else
-    {
-      if(target.x+target.width +4 >= game.width)
-      {
-        $(this).css("left", game.width - target.width);
-        $(this).data("max", true);
-      }
-      else
-        $(this).css("left", "+=4");
-    }
-  
     
+  
+    var speed = $(this).data("speed");
+    var timeout = new Date() - $(this).data("timeout");
+  
+    // don't move for 3 seconds after target has been hit
+    if(timeout >= 3000)
+    {
+      if($(this).data("max"))
+      {
+        if(target.x - speed <= 0)
+        {
+          $(this).css("left", 0);
+          $(this).data(
+          {
+            "max": false,
+            "speed": Math.random()*10+2
+          });
+        }
+        else
+          $(this).css("left", "-=" + speed);   
+      }
+      else
+      {
+        if(target.x+target.width + speed >= game.width)
+        {
+          $(this).css("left", game.width - target.width);
+          $(this).data(
+          {
+            "max": true,
+            "speed": Math.random()*10+2
+          });
+        }
+        else
+          $(this).css("left", "+=" + speed);
+      }
+    }
+    //else
+      //$(this).data("timeout", timeout-1);
     //if((x + ) >= game.width)
     
   
@@ -283,7 +299,7 @@ function animate()
         var target_hit = ( ((x + shot.width) >= target.x ) && (x <= (target.x + target.width) ) ) && ( ((y + shot.height) >= target.y)  &&  (y <= (target.y + target.height))  );
       
         if(target_hit)
-          $(this).data("hit", true);
+          $(this).data("timeout", new Date());
       
         hit = hit || target_hit;
       
