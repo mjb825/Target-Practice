@@ -60,8 +60,10 @@ $(document).ready(function()
       
   $(".target").data(
   {
-  "hit": false,
-  "timeout": 0
+    "hit": false,
+    "timeout": 0,
+    "speed": Math.random()*5+4,
+    "max": false
   });
 
   $(document).keydown(function(e)
@@ -85,7 +87,7 @@ $(document).ready(function()
         $("#turret").show();
         game.started=true;
         animate();
-      }
+      } 
     }
     // [left arrow] to decrease angle of turret
     else if(e.keyCode==37)
@@ -205,6 +207,40 @@ function animate()
   {
     return;
   }
+
+  $(".target").each(function()
+  {
+  
+    var target = {};
+    target.x = (parseFloat($(this).css("left")));
+    target.width = $(this).width();
+  
+    if($(this).data("max"))
+    {
+      if(target.x - 4 <= 0)
+      {
+        $(this).css("left", 0);
+        $(this).data("max", false);
+      }
+      else
+        $(this).css("left", "-=4");   
+    }
+    else
+    {
+      if(target.x+target.width +4 >= game.width)
+      {
+        $(this).css("left", game.width - target.width);
+        $(this).data("max", true);
+      }
+      else
+        $(this).css("left", "+=4");
+    }
+  
+    
+    //if((x + ) >= game.width)
+    
+  
+  });
 
   $(".bullet").each(function()
   {
