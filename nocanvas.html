@@ -114,8 +114,8 @@ $(document).ready(function()
       if(!game.paused && game.started)
         turret.angle += 5;
     }
-    // [space] to shoot
-    else if(e.keyCode==32)
+    // [f] to shoot
+    else if(e.keyCode==70)
     {
       if(!game.paused && game.started && turret.ammo > 0)
       {
@@ -206,9 +206,9 @@ $(document).ready(function()
       Press <u>P</u> to pause game
     </p>
     <p>
-      Use <u>LEFT</u> and <u>RIGHT</u> arrow keys to adjust turret
+      Press <u>LEFT</u> and <u>RIGHT</u> arrow keys to adjust turret
       <br>
-      Use <u>SPACEBAR</u> to fire at targets
+      Press <u>F</u> to fire at targets
     </p>
   </div>
   
@@ -228,6 +228,23 @@ $(document).ready(function()
   
   <div id="ammo">Ammo: 30</div>
   <div id="score">Score: 0</div>
+  
+  <div id="gameover">
+    <p>Game Over</p>
+    
+    <p class="score">Score: 0</p>
+    
+    <p>
+      Enter initials
+      <br>
+      <input maxlength="3" type="text">
+    </p>
+    
+    <p>
+      <input type="submit" value="Submit Score">
+    </p>
+    
+  </div>
   
 </div>
 
@@ -375,7 +392,8 @@ function animate()
   if(turret.ammo == 0 && $(".bullet").length == 0)
   {
     //document.title="game over";
-    //return;
+    $("#gameover").show();
+    return;
   }
 
   request_frame(function()
