@@ -26,6 +26,7 @@ turret.offset=0.5;
 // turret width of 20 with a bottom-position of -10 (move down 20/2) moves the turret to the edge (i.e., 0)
 // so moving it down one more half of turret width 10 (20/2), allows us to hide the bottom edge of turret in the game's border when it rotates
 turret.y=0 - (turret.width * turret.offset);
+turret.ammo=30;
 
 var shot={};
 shot.width=22;
@@ -95,6 +96,8 @@ $(document).ready(function()
         $("#message").hide();
         $("#turret").show();
         $("#targets").show();
+        $("#ammo").show();
+        $("#score").show();
         game.started=true;
         animate();
       } 
@@ -114,8 +117,11 @@ $(document).ready(function()
     // [space] to shoot
     else if(e.keyCode==32)
     {
-      if(!game.paused && game.started)
+      if(!game.paused && game.started && turret.ammo > 0)
       {
+      
+        turret.ammo--;
+      
         // calculate starting position of shot
         calculate_shot();
         
@@ -211,14 +217,17 @@ $(document).ready(function()
   <div id="turret"></div>
   
   <div id="targets">
-    <div class="target">10</div>
-    <div class="target">7</div>
-    <div class="target">3</div>
-    <div class="target">1</div>
-    <div class="target">1</div>
-    <div class="target">1</div>
-    <div class="target">1</div>
+    <div class="target"></div>
+    <div class="target"></div>
+    <div class="target"></div>
+    <div class="target"></div>
+    <div class="target"></div>
+    <div class="target"></div>
+    <div class="target"></div>
   </div>
+  
+  <div id="ammo">Ammo: 30</div>
+  <div id="score">Score: 0</div>
   
 </div>
 
@@ -359,8 +368,15 @@ function animate()
 
   });
 
-  //document.title = $(".bullet").length;
-  document.title=game.score;
+  //document.title=game.score;
+  $("#ammo").html("Ammo: " + turret.ammo);
+  $("#score").html("Score: " + game.score);
+  
+  if(turret.ammo == 0 && $(".bullet").length == 0)
+  {
+    //document.title="game over";
+    //return;
+  }
 
   request_frame(function()
   {
