@@ -73,7 +73,8 @@ $(document).ready(function()
     {},
     function(data)
     {
-      scores=JSON.parse(data);
+      if(data != "null")
+        scores=JSON.parse(data);
     }
   );
 
