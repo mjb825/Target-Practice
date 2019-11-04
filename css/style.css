@@ -123,6 +123,7 @@
 
 #gameover input[type="text"]:hover, #gameover input[type="text"]:focus {
   background: rgba(255, 255, 255, 0.5);
+  outline: none;
 }
 
 #gameover input[type="submit"] {
@@ -158,6 +159,14 @@
 #scores tr:first-child, #scores .current {
   background: rgba(255, 255, 255, 0.8);
   color: #1e5a97;
+}
+
+#scores .data {
+  cursor: pointer;
+}
+
+#scores .data:hover {
+  text-decoration: underline;
 }
 
 th, td {
@@ -199,4 +208,5 @@ tr {
   color: #1e5a97;
   padding: 2px;
   text-align: center;
+  border-bottom: 1px solid;
 }

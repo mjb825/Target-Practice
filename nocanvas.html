@@ -10,7 +10,7 @@
 <script type="application/javascript">
 angular.module("myApp", ["ngMessages"]);
 
-var scores;
+var scores = [];
 
 var game = {};
 game.width=1000;
@@ -573,31 +573,20 @@ function submit_score(e)
       .append($("<td>").html(index+1))
       .append($("<td>").html(value.player))
       .append($("<td>").html(value.score))
-      .append
-      (
-        $("<td>").append
-        (
-          $("<button>")
-            .html(value.hits)
-            .click(get_stats("hits", value.stats))
-        )
-      )
-      .append
-      (
-        $("<td>").append
-        (
-          $("<button>")
-            .html(value.inactive_hits)
-            .click(get_stats("inactive", value.stats_inactive))
-        )
-      )
+      .append($("<td>").html(value.hits))
+      .append($("<td>").html(value.inactive_hits))
       .append($("<td>").html(value.misses))
       .append($("<td>").html(value.time))
       .append($("<td>").html(date.toLocaleDateString()).prop("title", date.toLocaleTimeString()))
+      .click(get_stats(index+1, value.stats, value.stats_inactive, date))
+      .addClass("data")
       .appendTo($("#scores"));
       
     if(value.update)
+    {
+      get_stats(index+1, value.stats, value.stats_inactive, date)();
       row.addClass("current");
+    }
 
   });
   
@@ -607,27 +596,37 @@ function submit_score(e)
 
 }
 
-function get_stats(title, stats)
+function get_stats(rank, hit, inactive_hit, date)
 {
 
   return function()
   {
     $("#stats").remove();
     var modal = $("<div>")
-    .prop("id","stats")
-    .append("<div>Game Stats <span>" + title + "</span></div>")
-    .click(function(){$(this).remove()});
-    
-    
-    $.each(stats, function(key, value)
+      .prop("id","stats")
+      .append("<div>Game Stats<span>" + rank + "</span></div><span>Hits</span>")
+      .click(function(){$(this).remove()});
+
+    $.each(hit, function(key, value)
     {
     
       modal.append(key + ": " + value + "<br>");
     
     });
     
-    modal.appendTo($("#gameover"));
+    modal.append("<span>Inactive</span>");
     
+    $.each(inactive_hit, function(key, value)
+    {
+    
+      modal.append(key + ": " + value + "<br>");
+    
+    });
+
+    modal
+      .append("<span>Date</span>" + date.toLocaleDateString() + "<br>" + date.toLocaleTimeString())
+      .appendTo($("#gameover"));
+
   }
   
 }
