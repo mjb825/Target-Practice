@@ -10,16 +10,20 @@
 <script type="application/javascript">
 angular.module("myApp", ["ngMessages"]);
 
+var scores;
+
 var game = {};
 game.width=1000;
 game.height=700;
 game.started=false;
+game.paused_start=0;
+game.paused_time=0;
 game.start=0;
 game.end=0;
 game.score=0;
 game.hits=0;
 game.inactive_hits=0;
-game.missed=0;
+game.misses=0;
 
 var turret={};
 turret.width=22;
@@ -61,6 +65,15 @@ function calculate_shot()
 
 $(document).ready(function()
 {
+
+  // get current scores
+  $.post("scores.php",
+    {},
+    function(data)
+    {
+      scores=JSON.parse(data);
+    }
+  );
 
   $("#game_frame, #game, #gameover")
     .width(game.width)
@@ -121,7 +134,7 @@ $(document).ready(function()
         $("#ammo").show();
         $("#score").show();
         game.started=true;
-        game.start=new Date();
+        game.start=Date.now();
         animate();
       } 
     }
@@ -169,9 +182,13 @@ $(document).ready(function()
         {
           $("#pause").hide();
           animate();
+          game.paused_time+=(Date.now() - game.paused_start);
         }
         else
+        {
+          game.paused_start=Date.now();
           $("#pause").show();
+        }
       }
     }
   
@@ -256,13 +273,13 @@ $(document).ready(function()
 
 <div id="gameover">
 
-  <form name="myForm" ng-app="myApp">
+  <form id="results" name="myForm" ng-app="myApp" onsubmit="submit_score(event)">
     <p style="background: #fff; color: #1e5a97;">Game Over</p>
     
     <p>
       Enter your initials
       <br>
-      <input maxlength="3" type="text" name="initials" ng-pattern="/^[A-Za-z]*$/" ng-maxlength="3" ng-minlength="1" ng-model="initials" style="text-transform: uppercase;">
+      <input id="player" maxlength="3" type="text" name="initials" pattern="[A-Za-z]*" ng-pattern="/^[A-Za-z]*$/" ng-maxlength="3" ng-minlength="1" ng-model="initials" style="text-transform: uppercase;" required title="1-3 letters">
     </p>
     
     <p>
@@ -272,7 +289,7 @@ $(document).ready(function()
       <br>
       Inactive Hits: <span class="inactive_hits">0</span>
       <br>
-      Missed: <span class="missed">0</span>
+      Misses: <span class="misses">0</span>
       <br>
       Time: <span class="time">0s</span>
     </p>
@@ -283,11 +300,31 @@ $(document).ready(function()
     
     <div style="position: absolute; bottom: 0; left: 0; right: 0; margin: auto;" ng-messages="myForm.initials.$error" role="alert">
       <div ng-message="pattern">Only use letters for initials</div>
-      <div ng-message="maxlength">Maximum of 3 characters</div>
-      <div ng-message="minlength">Minimum of 1 character</div>
+      <!-- following messages aren't necessary, but just keeping as a reference -->
+      <!-- maxlength won't show because maxlength="3" prevents more characters from being written -->
+      <!-- minlength won't show because it won't activate with ng-minlength="1", ng-minlength="2" will only trigger the message -->
+      <!-- required WILL show, but it would show up immediately, which I don't want -->
+      <!-- <div ng-message="maxlength">Maximum of 3 characters</div> -->
+      <!-- <div ng-message="minlength">Minimum of 1 character</div> -->
+      <!-- <div ng-message="required">You must enter something</div> -->
     </div>
     
   </form>
+
+  <table id="scores">
+
+    <tr>
+      <th>Rank</th>
+      <th>Player</th>
+      <th>Score</th>
+      <th>Hits</th>
+      <th>Inactive Hits</th>
+      <th>Misses</th>
+      <th>Time</th>
+      <th>Date</th>
+    </tr>
+
+  </table>
 
 </div>
 
@@ -311,7 +348,7 @@ function animate()
     target.x = (parseFloat($(this).css("left")));
   
     var speed = $(this).data("speed");
-    var timeout = new Date() - $(this).data("timeout");
+    var timeout = Date.now() - $(this).data("timeout");
   
     // don't move for 3 seconds after target has been hit
     if(timeout >= 3000)
@@ -380,7 +417,7 @@ function animate()
     ((x) >= game.width);
 
     if(hit)
-      game.missed++;
+      game.misses++;
 
     // calculate shot hitting a target if it hasn't already hit a boundary
     if(!hit)
@@ -396,10 +433,9 @@ function animate()
         if(target_hit)
         {
           // initialize time for target inactivity (even if it gets hit again when inactive, but it won't increase score)
-          $(this).data("timeout", new Date());
+          $(this).data("timeout", Date.now());
           
           // don't increase score if target is in inactive state
-          //[update] adjust score according to target hit
           if(!$(this).data("prev_hit"))
           {
             game.score+=$(this).data("value");
@@ -431,12 +467,15 @@ function animate()
   
   if(turret.ammo == 0 && $(".bullet").length == 0)
   {
-    game.end=new Date();
+    game.end=Date.now();
+    
+    game.start+=game.paused_time;
     
     $(".hits").html(game.hits);
     $(".inactive_hits").html(game.inactive_hits);
-    $(".missed").html(game.missed);
-    $(".time").html(get_time(game.start, game.end));
+    $(".misses").html(game.misses);
+    game.time=get_time(game.start, game.end);
+    $(".time").html(game.time);
     
     $("#gameover").show();
     return;
@@ -453,7 +492,7 @@ var second = 1000;
 var minute = second * 60;
 var hour = minute * 60;
 
-// determine time between two date objects
+// determine time between two date times
 function get_time(begin, end)
 {
 
@@ -464,6 +503,81 @@ function get_time(begin, end)
     return parseInt(elapsed / minute) + "m" + parseInt(elapsed % minute / second) + "s";
   else
     return parseInt(elapsed / second) + "s";
+
+}
+
+function submit_score(e)
+{
+  // not needed it seems since AngularJS seems to prevent form from being submitted if no action is assigned to form
+  // but just to be safe
+  e.preventDefault();
+  
+  var record = {
+      update: true,
+      player: $("#player").val().toUpperCase(),
+      score: game.score,
+      hits: game.hits,
+      inactive_hits: game.inactive_hits,
+      misses: game.misses,
+      time: game.time,
+      date: game.end,
+      raw_time: game.end-game.start
+    }
+  
+  // submit form without leaving/refreshing page
+  $.post("scores.php", record,
+    function(data)
+    {
+      // following code won't work since it takes too long, and the rest of the javascript code executes before this is finished resulting in scores being undefined
+      // instead, on document ready, get the current scores and assign them to scores object and here, just push the record object to the array of current scores
+      // data isn't jeopardized since even if the user does alter the scores object on the client, it will have an effect on the scores shown on the scores table, but the scores object isn't sent back to the server, just current record
+      // of course, user could just alter the attributes that make up the record object before submitting their initials, but that just isn't fun :P
+      //scores=JSON.parse(data);
+    }
+  
+  );
+
+  // push current record to scores (retrieved using scores.php earlier)
+  scores.push(record);
+
+  // sort records according to score, time spent (if scores equal), date (if time spent equal, earlier record gets precedence)
+  scores.sort(compare);
+  
+  // build scores table
+  $.each(scores, function(index, value)
+  {
+    $("<tr>")
+      .append($("<td>").html(index+1))
+      .append($("<td>").html(value.player))
+      .append($("<td>").html(value.score))
+      .append($("<td>").html(value.hits))
+      .append($("<td>").html(value.inactive_hits))
+      .append($("<td>").html(value.misses))
+      .append($("<td>").html(value.time))
+      .append($("<td>").html(new Date(Number(value.date)).toLocaleDateString()))
+      .appendTo($("#scores"));
+  });
+  
+  //hide results and show scores
+  $("#results").hide();
+  $("#scores").show();
+
+}
+
+function compare(a, b)
+{
+
+  if(a.score == b.score)
+  {
+  
+    if(a.raw_time == b.raw_time)
+      return a.date - b.date;
+      
+    return a.raw_time - b.raw_time;
+    
+  }
+
+  return b.score - a.score;
 
 }
 </script>
