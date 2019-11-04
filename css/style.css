@@ -108,6 +108,7 @@
   color: #fff;
   display: none;
   z-index: 5;
+  overflow: auto;
 }
 
 #gameover input[type="text"] {
@@ -135,4 +136,67 @@
 
 #gameover input[type="submit"]:hover {
   opacity: 1;
+}
+
+#scores {  
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14pt;
+  color: #fff;
+  display: none;
+}
+
+#scores button {
+  border: 1px solid #1e5a97;
+  color: #1e5a97;
+  background: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  font: 14pt calibri;
+}
+
+#scores tr:first-child, #scores .current {
+  background: rgba(255, 255, 255, 0.8);
+  color: #1e5a97;
+}
+
+th, td {
+  padding: 4px;
+  word-wrap: break-word;
+}
+
+tr {
+  border-bottom: 1px solid #fff;
+}
+
+:invalid {
+  box-shadow: none;
+}
+
+#stats {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: #fff;
+  color: #1e5a97;
+  border: 2px solid;
+  text-align: left;
+  padding: 4px;
+  cursor: pointer;
+  font: 14pt calibri;
+}
+
+#stats div {
+  background: #1e5a97;
+  color: #fff;
+  padding: 4px;
+  text-align: center;
+}
+
+#stats span {
+  display: block;
+  background: #fff;
+  color: #1e5a97;
+  padding: 2px;
+  text-align: center;
 }

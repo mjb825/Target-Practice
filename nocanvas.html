@@ -24,6 +24,8 @@ game.score=0;
 game.hits=0;
 game.inactive_hits=0;
 game.misses=0;
+game.stats={};
+game.stats_inactive={};
 
 var turret={};
 turret.width=22;
@@ -141,19 +143,19 @@ $(document).ready(function()
     // [left arrow] to decrease angle of turret
     else if(e.keyCode==37)
     {
-      if(!game.paused && game.started)
+      if(!game.paused && game.started && !game.end)
         turret.angle -= 5;
     }
     // [right arrow] to increase angle of turret
     else if(e.keyCode==39)
     {
-      if(!game.paused && game.started)
+      if(!game.paused && game.started && !game.end)
         turret.angle += 5;
     }
     // [f] to shoot
     else if(e.keyCode==70)
     {
-      if(!game.paused && game.started && turret.ammo > 0)
+      if(!game.paused && game.started && turret.ammo > 0 && !game.end)
       {
       
         turret.ammo--;
@@ -175,7 +177,7 @@ $(document).ready(function()
     // [p] to pause game
     else if(e.keyCode==80)
     {
-      if(game.started)
+      if(game.started && !game.end)
       {
         game.paused=!game.paused;
         if(!game.paused)
@@ -279,7 +281,8 @@ $(document).ready(function()
     <p>
       Enter your initials
       <br>
-      <input id="player" maxlength="3" type="text" name="initials" pattern="[A-Za-z]*" ng-pattern="/^[A-Za-z]*$/" ng-maxlength="3" ng-minlength="1" ng-model="initials" style="text-transform: uppercase;" required title="1-3 letters">
+      <!-- ng-trim="false" so that angular validation will include spaces at beginning and end of input -->
+      <input id="player" maxlength="3" type="text" name="initials" pattern="[A-Za-z]*" ng-pattern="/^[A-Za-z]*$/" ng-maxlength="3" ng-minlength="1" ng-model="initials" style="text-transform: uppercase;" required title="1-3 letters" ng-trim="false">
     </p>
     
     <p>
@@ -440,9 +443,23 @@ function animate()
           {
             game.score+=$(this).data("value");
             game.hits++;
+            
+            // keep track of specific targets hit
+            if(!game.stats[$(this).data("value")])
+              game.stats[$(this).data("value")] = 1;
+            else
+              game.stats[$(this).data("value")]++;
           }
           else
+          {
             game.inactive_hits++;
+            
+            // keep track of inactive targets hit too, because why not
+            if(!game.stats_inactive[$(this).data("value")])
+              game.stats_inactive[$(this).data("value")] = 1;
+            else
+              game.stats_inactive[$(this).data("value")]++;
+          }
             
           // assign prev_hit value
           $(this)
@@ -478,6 +495,7 @@ function animate()
     $(".time").html(game.time);
     
     $("#gameover").show();
+    $("#player").focus();
     return;
   }
 
@@ -512,6 +530,7 @@ function submit_score(e)
   // but just to be safe
   e.preventDefault();
   
+  // POST values used by scores.php
   var record = {
       update: true,
       player: $("#player").val().toUpperCase(),
@@ -521,7 +540,9 @@ function submit_score(e)
       misses: game.misses,
       time: game.time,
       date: game.end,
-      raw_time: game.end-game.start
+      raw_time: game.end-game.start,
+      stats: game.stats,
+      stats_inactive: game.stats_inactive
     }
   
   // submit form without leaving/refreshing page
@@ -530,7 +551,7 @@ function submit_score(e)
     {
       // following code won't work since it takes too long, and the rest of the javascript code executes before this is finished resulting in scores being undefined
       // instead, on document ready, get the current scores and assign them to scores object and here, just push the record object to the array of current scores
-      // data isn't jeopardized since even if the user does alter the scores object on the client, it will have an effect on the scores shown on the scores table, but the scores object isn't sent back to the server, just current record
+      // data isn't jeopardized since even if the user does alter the scores object on the client. it will have an effect on the scores shown on the scores table, but the scores object isn't sent back to the server, just current record
       // of course, user could just alter the attributes that make up the record object before submitting their initials, but that just isn't fun :P
       //scores=JSON.parse(data);
     }
@@ -546,29 +567,69 @@ function submit_score(e)
   // build scores table
   $.each(scores, function(index, value)
   {
+    var date = new Date(Number(value.date));
+    
     var row = $("<tr>")
       .append($("<td>").html(index+1))
       .append($("<td>").html(value.player))
       .append($("<td>").html(value.score))
-      .append($("<td>").html(value.hits))
-      .append($("<td>").html(value.inactive_hits))
+      .append
+      (
+        $("<td>").append
+        (
+          $("<button>")
+            .html(value.hits)
+            .click(get_stats("hits", value.stats))
+        )
+      )
+      .append
+      (
+        $("<td>").append
+        (
+          $("<button>")
+            .html(value.inactive_hits)
+            .click(get_stats("inactive", value.stats_inactive))
+        )
+      )
       .append($("<td>").html(value.misses))
       .append($("<td>").html(value.time))
-      .append($("<td>").html(new Date(Number(value.date)).toLocaleDateString()))
+      .append($("<td>").html(date.toLocaleDateString()).prop("title", date.toLocaleTimeString()))
       .appendTo($("#scores"));
       
     if(value.update)
-      row.css(
-      {
-        "background-color": "#fff",
-        "color": "#1e5a97"
-      });
+      row.addClass("current");
+
   });
   
   //hide results and show scores
   $("#results").hide();
   $("#scores").show();
 
+}
+
+function get_stats(title, stats)
+{
+
+  return function()
+  {
+    $("#stats").remove();
+    var modal = $("<div>")
+    .prop("id","stats")
+    .append("<div>Game Stats <span>" + title + "</span></div>")
+    .click(function(){$(this).remove()});
+    
+    
+    $.each(stats, function(key, value)
+    {
+    
+      modal.append(key + ": " + value + "<br>");
+    
+    });
+    
+    modal.appendTo($("#gameover"));
+    
+  }
+  
 }
 
 function compare(a, b)
