@@ -546,7 +546,7 @@ function submit_score(e)
   // build scores table
   $.each(scores, function(index, value)
   {
-    $("<tr>")
+    var row = $("<tr>")
       .append($("<td>").html(index+1))
       .append($("<td>").html(value.player))
       .append($("<td>").html(value.score))
@@ -556,6 +556,13 @@ function submit_score(e)
       .append($("<td>").html(value.time))
       .append($("<td>").html(new Date(Number(value.date)).toLocaleDateString()))
       .appendTo($("#scores"));
+      
+    if(value.update)
+      row.css(
+      {
+        "background-color": "#fff",
+        "color": "#1e5a97"
+      });
   });
   
   //hide results and show scores
