@@ -211,7 +211,7 @@ tr {
   border-bottom: 1px solid;
 }
 
-#view_scores {
+#results, #view_scores {
   display: none;
 }
 
