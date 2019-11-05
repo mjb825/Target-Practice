@@ -553,9 +553,6 @@ function submit_score(e)
   // push current record to scores (retrieved using scores.php earlier)
   scores.push(record);
 
-  // sort records according to score, time spent (if scores equal), date (if time spent equal, earlier record gets precedence)
-  scores.sort(compare);
-  
   // build scores table
   build_scores();
   
@@ -615,7 +612,10 @@ function new_game()
 
 function build_scores()
 {
-
+  
+  // sort records according to score, time spent (if scores equal), date (if time spent equal, earlier record gets precedence)
+  scores.sort(compare);
+  
   $("#view_scores table").remove();
 
   $("<table>").html("<tr><th>Rank</th><th>Player</th><th>Score</th><th>Hits</th><th>Inactive Hits</th><th>Misses</th><th>Time</th><th>Date</th></tr>").prop("id","scores").appendTo("#view_scores");
@@ -633,21 +633,21 @@ function build_scores()
       .append($("<td>").html(value.misses))
       .append($("<td>").html(value.time))
       .append($("<td>").html(date.toLocaleDateString()).prop("title", date.toLocaleTimeString()))
-      .click(get_stats(index+1, value.stats, value.stats_inactive, date))
+      .click(get_stats(index+1, value.stats, value.stats_inactive, date, value.raw_time))
       .addClass("data")
       .appendTo($("#scores"));
       
     if(value.update)
     {
       value.update=false;
-      get_stats(index+1, value.stats, value.stats_inactive, date)();
+      get_stats(index+1, value.stats, value.stats_inactive, date, value.raw_time)();
       row.addClass("current");
     }
 
   });
 }
 
-function get_stats(rank, hit, inactive_hit, date)
+function get_stats(rank, hit, inactive_hit, date, time)
 {
 
   return function()
@@ -675,7 +675,7 @@ function get_stats(rank, hit, inactive_hit, date)
     });
 
     modal
-      .append("<span>Date</span>" + date.toLocaleDateString() + "<br>" + date.toLocaleTimeString())
+      .append("<span>Date</span>" + date.toLocaleDateString() + "<br>" + date.toLocaleTimeString() + "<span>Time (ms)</span>" + time)
       .appendTo($("#gameover"));
 
   }
