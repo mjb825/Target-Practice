@@ -215,10 +215,6 @@ tr {
   display: none;
 }
 
-#view_scores p {
-  margin: 0;
-}
-
 #view_scores .subtitle {
   font-size: .5em;
   border-bottom: 1px solid #fff;
