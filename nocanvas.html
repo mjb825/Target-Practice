@@ -17,6 +17,7 @@ var game = {};
 game.width=1000;
 game.height=700;
 game.started=false;
+game.paused=false;
 game.paused_start=0;
 game.paused_time=0;
 game.start=0;
@@ -108,7 +109,8 @@ $(document).ready(function()
         })
       .css(
         {
-          "top": index*60 + "px",
+          "top": index*60,
+          "left": 0,
           "border": target.border_width + "px solid " + target.border_color,
           "background-color": target.background_color,
           "width": target.width,
@@ -125,8 +127,11 @@ $(document).ready(function()
     {
       if(!game.started)
       {
+        view_scores=false;
+        console.log("new game started");
         $("#message, #gameover, #scores, #view_scores").hide();
         $("#turret, #targets, #ammo, #score").show();
+        $("#stats").remove();
         game.started=true;
         game.start=Date.now();
         animate();
@@ -188,7 +193,7 @@ $(document).ready(function()
     // [s] to view scores
     else if(e.keyCode==83)
     {
-      if(!game.started && view_scores)
+      if(view_scores)
       {
       
         // build scores table
@@ -269,7 +274,7 @@ $(document).ready(function()
       Enter your initials
       <br>
       <!-- ng-trim="false" so that angular validation will include spaces at beginning and end of input -->
-      <input id="player" maxlength="3" type="text" name="initials" pattern="[A-Za-z]*" ng-pattern="/^[A-Za-z]*$/" ng-maxlength="3" ng-minlength="1" ng-model="initials" style="text-transform: uppercase;" required title="1-3 letters" ng-trim="false">
+      <input id="player" disabled maxlength="3" type="text" name="initials" pattern="[A-Za-z]*" ng-pattern="/^[A-Za-z]*$/" ng-maxlength="3" ng-minlength="1" ng-model="initials" style="text-transform: uppercase;" required title="1-3 letters" ng-trim="false">
     </p>
     
     <p>
@@ -480,7 +485,7 @@ function animate()
     $(".time").html(game.time);
     
     $("#gameover, #results").show();
-    $("#player").focus();
+    $("#player").prop("disabled", false).focus();
     return;
   }
 
@@ -514,6 +519,8 @@ function submit_score(e)
   // not needed it seems since AngularJS seems to prevent form from being submitted if no action is assigned to form
   // but just to be safe
   e.preventDefault();
+  
+  $("#player").prop("disabled", true);
   
   // POST values used by scores.php
   var record = {
@@ -551,10 +558,59 @@ function submit_score(e)
   
   // build scores table
   build_scores();
+  
+  // reset variables to start a new game
+  new_game();
+  
   //hide results and show scores
   $("#results").hide();
   $("#gameover, #scores, #view_scores").show();
 
+}
+
+function new_game()
+{
+
+  game.started=false;
+  game.paused=false;
+  game.paused_start=0;
+  game.paused_time=0;
+  game.start=0;
+  game.end=0;
+  game.score=0;
+  game.hits=0;
+  game.inactive_hits=0;
+  game.misses=0;
+  game.stats={};
+  game.stats_inactive={};
+
+  turret.angle=90;
+  turret.ammo=30;
+
+  $.each($(".target"), function(index, value)
+  {
+    $(this)
+      .data(
+        {
+          "prev_hit": false,
+          "timeout": 10000,
+          "speed": Math.random()*10+2,
+          "max": false,
+          "value": (($(".target").length-index-1)*3+1),
+          "value": Math.pow(2, ($(".target").length-index-1))
+        })
+      .css(
+        {
+          "top": index*60 + "px",
+          "left": 0,
+          "border": target.border_width + "px solid " + target.border_color,
+          "background-color": target.background_color,
+          "width": target.width,
+          "height": target.height
+        })
+      .html($(this).data("value"));
+  });
+  
 }
 
 function build_scores()
@@ -583,6 +639,7 @@ function build_scores()
       
     if(value.update)
     {
+      value.update=false;
       get_stats(index+1, value.stats, value.stats_inactive, date)();
       row.addClass("current");
     }
