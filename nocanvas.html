@@ -11,6 +11,7 @@
 angular.module("myApp", ["ngMessages"]);
 
 var scores = [];
+var view_scores = false;
 
 var game = {};
 game.width=1000;
@@ -75,6 +76,8 @@ $(document).ready(function()
     {
       if(data != "null")
         scores=JSON.parse(data);
+      view_scores=true;
+      $("#scores_message").show();
     }
   );
 
@@ -185,6 +188,22 @@ $(document).ready(function()
         }
       }
     }
+    else if(e.keyCode==83)
+    {
+      if(view_scores)
+      {
+      
+        // build scores table
+        build_scores();
+        
+        //hide results and show scores
+        $("#gameover").show();
+        $("#results").hide();
+        $("#scores").show();
+        $("#view_scores").show();
+      
+      }
+    }
 
     // limit degree of turret
     if(turret.angle <= 20)
@@ -221,6 +240,9 @@ $(document).ready(function()
       Press <u>LEFT</u> and <u>RIGHT</u> arrow keys to adjust turret
       <br>
       Press <u>F</u> to fire at targets
+    </p>
+    <p id="scores_message">
+      Press <u>S</u> to view scores
     </p>
   </div>
   
@@ -283,21 +305,19 @@ $(document).ready(function()
     </div>
     
   </form>
-
-  <table id="scores">
-
-    <tr>
-      <th>Rank</th>
-      <th>Player</th>
-      <th>Score</th>
-      <th>Hits</th>
-      <th>Inactive Hits</th>
-      <th>Misses</th>
-      <th>Time</th>
-      <th>Date</th>
-    </tr>
-
-  </table>
+  
+  <div id="view_scores">
+  
+    <p>
+      High Scores
+      <div class="subtitle">
+        (click a record to view more details)
+        <br>
+        (press <u>ENTER</u> to start game)
+      </div>
+    </p>
+  
+  </div>
 
 </div>
 
@@ -535,6 +555,19 @@ function submit_score(e)
   scores.sort(compare);
   
   // build scores table
+  build_scores();
+  
+  //hide results and show scores
+  $("#results").hide();
+  $("#scores").show();
+
+}
+
+function build_scores()
+{
+
+  $("<table>").html("<tr><th>Rank</th><th>Player</th><th>Score</th><th>Hits</th><th>Inactive Hits</th><th>Misses</th><th>Time</th><th>Date</th></tr>").prop("id","scores").appendTo("#view_scores");
+
   $.each(scores, function(index, value)
   {
     var date = new Date(Number(value.date));
@@ -559,11 +592,6 @@ function submit_score(e)
     }
 
   });
-  
-  //hide results and show scores
-  $("#results").hide();
-  $("#scores").show();
-
 }
 
 function get_stats(rank, hit, inactive_hit, date)
