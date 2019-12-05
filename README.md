@@ -17,4 +17,4 @@ Press `F` to fire at targets
 
 Press `S` to view scores (if hosted on server that supports PHP)
 
-Scores won't be retained using GitHub Pages because PHP isn't supported since it's only meant for static websites.
+Scores won't be retained using GitHub Pages because PHP isn't supported since it's only meant for static websites, but scores will still be retained if you don't leave the page.
