@@ -1,7 +1,7 @@
 # Target-Practice
 Fun little game where you shoot at moving targets
 
-https://mjbelow.github.io/Target-Practice/nocanvas.html
+https://mjbelow.github.io/target-practice/nocanvas.html
 
 **Instructions**
 
