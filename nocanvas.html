@@ -71,6 +71,49 @@ function calculate_shot()
 $(document).ready(function()
 {
 
+var left = false;
+var right = false;
+var shoot = false;
+var last_shot = 0;
+
+setInterval(function() { // this code is executed every 500 milliseconds:
+
+      if(!game.paused && game.started && !game.end)
+      {
+        if (left)
+            turret.angle -= 1;
+        if (right)
+            turret.angle += 1;
+            
+        // limit degree of turret
+        if(turret.angle <= 20)
+          turret.angle = 20;
+        else if(turret.angle >= 160)
+          turret.angle = 160;
+          
+        if (shoot && turret.ammo > 0 && (Date.now() - last_shot) > 50)
+        {
+            last_shot = Date.now();
+            turret.ammo--;
+          
+            // calculate starting position of shot
+            calculate_shot();
+            
+            // create and append shot
+            $("<div>")
+              .addClass("bullet")
+              .css("left", shot.x+"px")
+              .css("top", shot.y+"px")
+              .width(shot.width)
+              .height(shot.height)
+              .data("angle", turret.angle)
+              .appendTo($("#game"));
+        }
+
+        $("#turret").css("transform", "rotate(" + turret.angle + "deg)");
+      }
+}, 1000 / 120);
+
   // get current scores
   $.post("scores.php",
     {},
@@ -121,6 +164,22 @@ $(document).ready(function()
       .html($(this).data("value"));
   });
 
+  $(document).keyup(function(e)
+  {
+    if(e.keyCode==37)
+    {
+      left = false;
+    }
+    else if(e.keyCode==39)
+    {
+      right = false;
+    }
+    else if(e.keyCode==70)
+    {
+      shoot = false;
+    }
+  });
+
   $(document).keydown(function(e)
   {
 
@@ -141,36 +200,17 @@ $(document).ready(function()
     // [left arrow] to decrease angle of turret
     else if(e.keyCode==37)
     {
-      if(!game.paused && game.started && !game.end)
-        turret.angle -= 5;
+      left = true;
     }
     // [right arrow] to increase angle of turret
     else if(e.keyCode==39)
     {
-      if(!game.paused && game.started && !game.end)
-        turret.angle += 5;
+      right = true;
     }
     // [f] to shoot
     else if(e.keyCode==70)
     {
-      if(!game.paused && game.started && turret.ammo > 0 && !game.end)
-      {
-      
-        turret.ammo--;
-      
-        // calculate starting position of shot
-        calculate_shot();
-        
-        // create and append shot
-        $("<div>")
-          .addClass("bullet")
-          .css("left", shot.x+"px")
-          .css("top", shot.y+"px")
-          .width(shot.width)
-          .height(shot.height)
-          .data("angle", turret.angle)
-          .appendTo($("#game"));
-      }
+      shoot = true;
     }
     // [p] to pause game
     else if(e.keyCode==80)
@@ -206,14 +246,6 @@ $(document).ready(function()
       
       }
     }
-
-    // limit degree of turret
-    if(turret.angle <= 20)
-      turret.angle = 20;
-    else if(turret.angle >= 160)
-      turret.angle = 160;
-
-    $("#turret").css("transform", "rotate(" + turret.angle + "deg)");
     
   });
 
